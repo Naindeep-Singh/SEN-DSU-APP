@@ -48,7 +48,7 @@ class _GriddpageState extends State<Griddpage> {
   }
 
   Future<void> sendstudData() async {
-    final url = Uri.parse('http://192.168.245.71:5000/storedata');
+    final url = Uri.parse('http://192.168.0.112:5000/storedata');
     final headers = {
       'Content-Type': 'application/json',
     };

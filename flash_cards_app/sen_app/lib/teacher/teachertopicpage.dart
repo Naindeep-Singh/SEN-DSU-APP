@@ -15,7 +15,7 @@ class _TeacherTpState extends State<TeacherTp> {
   Future<void> sendGet() async {
     List<Widget> temptopics = [];
 
-    final Uri url = Uri.parse('http://192.168.245.71:5000/get_document');
+    final Uri url = Uri.parse('http:/192.168.0.112:5000/get_document');
 
     try {
       // Send the GET request

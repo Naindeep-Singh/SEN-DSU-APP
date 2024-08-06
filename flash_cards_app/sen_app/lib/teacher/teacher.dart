@@ -15,7 +15,7 @@ class TeacherPageState extends State<TeacherPage> {
   Map data = {};
   int _selectedStudents = 25;
   Future<void> sendGet() async {
-    final Uri url = Uri.parse('http://192.168.245.71:5000/t_get_document');
+    final Uri url = Uri.parse('http://192.168.0.112:5000/t_get_document');
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 24));
       if (response.statusCode == 200) {

@@ -38,7 +38,7 @@ class _StudentPageState extends State<StudentPage> {
 
         // Send the file to the server
         Response response = await _dio.post(
-          'http://192.168.245.71:5000/process_document', // Replace with your Flask server URL
+          'http://192.168.0.112:5000/process_document', // Replace with your Flask server URL
           data: formData,
           options: Options(
             headers: {
