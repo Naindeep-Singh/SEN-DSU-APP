@@ -57,6 +57,7 @@ class _StudentPageState extends State<Documentupload> {
         String geminiResponse = await _sendFileToGemini(processedText);
 
         //test if we get correcly formatted string
+        // ignore: unused_local_variable
         var test = json5.json5Decode(geminiResponse);
         log('ITS FORMATTED!');
         snackbarMsg("File Uploaded Successfully!", Colors.teal);
