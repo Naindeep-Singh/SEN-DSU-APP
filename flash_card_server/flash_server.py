@@ -5,6 +5,7 @@ import google.generativeai as genai
 from flask_cors import CORS
 import pandas as pd
 import datetime
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 CORS(app)
@@ -12,6 +13,35 @@ genai.configure(api_key="AIzaSyBJJQMsJbz5wTUgTe1615WUkMFEJaNyCG0")
 model = genai.GenerativeModel(
     "gemini-1.5-flash", generation_config={"response_mime_type": "application/json"}
 )
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:root18@localhost/senDB"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
+
+
+# Define the LoginCreds model
+class LoginCreds(db.Model):
+    __tablename__ = "login_creds"
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+
+class FileInfo(db.Model):
+    __tablename__ = "file_info"
+
+    id = db.Column(db.Integer, primary_key=True)
+    file_path = db.Column(db.String(255), nullable=False)
+    file_type = db.Column(db.String(50), nullable=False)
+    status = db.Column(db.String(50), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
+    active = db.Column(db.Boolean, default=True, nullable=False)
+
+
+# Initialize the database
+with app.app_context():
+    db.create_all()
 
 
 def process_and_send_to_gemini(filepath):
@@ -292,6 +322,41 @@ def process_doc():
 
     # Return the response from Gemini
     return jsonify(response)
+
+
+@app.route('/add_creds', methods=['POST'])
+def add_creds():
+    data = request.get_json()
+    if not data or 'username' not in data or 'password' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+
+    # Check if the user already exists
+    existing_user = LoginCreds.query.filter_by(username=data['username']).first()
+    if existing_user:
+        return jsonify({"error": "User already exists"}), 409
+
+    new_cred = LoginCreds(username=data['username'], password=data['password'])
+    db.session.add(new_cred)
+    db.session.commit()
+    return jsonify({"message": "Credentials added successfully"}), 201
+
+# POST endpoint to verify login credentials
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    if not data or 'username' not in data or 'password' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+
+    # Find the user by username
+    user = LoginCreds.query.filter_by(username=data['username']).first()
+    if not user:
+        return jsonify({"error": "User does not exist"}), 404
+
+    # Check if the password matches
+    if user.password != data['password']:
+        return jsonify({"error": "Wrong password"}), 401
+
+    return jsonify({"message": "Login successful"}), 200
 
 
 if __name__ == "__main__":

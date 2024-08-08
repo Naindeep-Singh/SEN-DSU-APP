@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:sen_app_latest/student/flipcard.dart';
 import 'package:sen_app_latest/student/questionspage.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:sen_app_latest/startscreen/splashscreen.dart';
@@ -86,16 +87,27 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       onTap: () {
         debugPrint("$name is the topic");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => QuestionsPage(
-              data: data,
-              name: name,
-              ans: ans,
+        if (ans) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FlipCardPage(
+                data: data,
+              ),
             ),
-          ),
-        );
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => QuestionsPage(
+                data: data,
+                name: name,
+                ans: ans,
+              ),
+            ),
+          );
+        }
       },
       shape: const RoundedRectangleBorder(
           side: BorderSide(color: Colors.black, width: 2),
