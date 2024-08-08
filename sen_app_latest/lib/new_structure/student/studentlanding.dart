@@ -22,7 +22,7 @@ class _StudentLandingState extends State<StudentLanding> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Documentupload(
+                    builder: (context) => DocumentUpload(
                       username: widget.username,
                     ),
                   ),

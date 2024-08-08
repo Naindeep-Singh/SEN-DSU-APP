@@ -8,15 +8,15 @@ import 'package:json5/json5.dart' as json5;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Documentupload extends StatefulWidget {
-  const Documentupload({super.key, required this.username});
+class DocumentUpload extends StatefulWidget {
+  const DocumentUpload({super.key, required this.username});
   final String username;
 
   @override
-  State<Documentupload> createState() => _StudentPageState();
+  State<DocumentUpload> createState() => _DocumentUploadState();
 }
 
-class _StudentPageState extends State<Documentupload> {
+class _DocumentUploadState extends State<DocumentUpload> {
   bool isUploading = false;
   String message = '';
   List<Widget> topics = [];
@@ -56,8 +56,7 @@ class _StudentPageState extends State<Documentupload> {
 
         String geminiResponse = await _sendFileToGemini(processedText);
 
-        //test if we get correcly formatted string
-        // ignore: unused_local_variable
+        // Test if we get correctly formatted string
         var test = json5.json5Decode(geminiResponse);
         log('ITS FORMATTED!');
         snackbarMsg("File Uploaded Successfully!", Colors.teal);
@@ -124,7 +123,7 @@ class _StudentPageState extends State<Documentupload> {
 
   Future<String> _sendFileToGemini(String extractedtext) async {
     // Define the mime type for PDF
-    log('Entered send filet to gemini');
+    log('Entered send file to gemini');
     const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc';
     // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
     final model = GenerativeModel(
@@ -134,9 +133,189 @@ class _StudentPageState extends State<Documentupload> {
             GenerationConfig(responseMimeType: "application/json"));
     // Create the content to send to Gemini
     final content = [
-      Content.text(
-          'Give me the response in well-formatted JSON format with these Instructions: Read the provided article carefully and identify the main topics discussed. Article:{$extractedtext} Questions: For each identified topic, generate 3 multiple-choice questions with only easy and hard difficulty levels. You should have a maximum of 4 topics. Structure the output in the following JSON format: {"topicname": {"questionNumber": {"question": "question here", "difficultyLevel": "difficulty", "answer": "answer here", "options": ["4 options here"]}}} Important: To avoid JSON syntax errors, ensure that all keys and string values are enclosed in double quotes. Avoid using single quotes or unescaped special characters within strings. Examples: Good: {"Neural Networks": {"1": {"question": "What is a neural network inspired by?", "difficultyLevel": "easy", "answer": "Biological neural networks", "options": ["Biological neural networks", "Mechanical systems", "Quantum computing", "Traditional algorithms"]}, "2": {"question": "Which learning method involves the network adjusting weights based on errors?", "difficultyLevel": "hard", "answer": "Supervised learning", "options": ["Unsupervised learning", "Reinforcement learning", "Supervised learning", "Semi-supervised learning"]}}}')
+      Content.text('''
+      {
+        "instructions": [
+          "Here is an article. Please read it carefully and then answer the following questions: ",
+          "1. Identify the main topics discussed in the article."
+        ],
+        "text": "$extractedtext",
+        "desired_output": [
+          "For each identified topic, generate 3 multiple-choice questions with only easy and hard difficulty levels.",
+          "You should have a maximum of 4 topics.",
+          "Structure the output in the following JSON format:",
+          "{topicname: {questionNumber: {question: 'question here', difficultyLevel: 'difficulty', answer: 'answer here', options: ['4 options here']}}}"
+        ],
+        "examples": {
+          "good": [
+            {
+              "Neural Networks": {
+                "1": {
+                  "question": "What is a neural network inspired by?",
+                  "difficultyLevel": "easy",
+                  "answer": "Biological neural networks",
+                  "options": [
+                    "Biological neural networks",
+                    "Mechanical systems",
+                    "Quantum computing",
+                    "Traditional algorithms"
+                  ]
+                },
+                "2": {
+                  "question": "Which learning method involves the network adjusting weights based on errors?",
+                  "difficultyLevel": "hard",
+                  "answer": "Supervised learning",
+                  "options": [
+                    "Unsupervised learning",
+                    "Reinforcement learning",
+                    "Supervised learning",
+                    "Semi-supervised learning"
+                  ]
+                },
+                "3": {
+                  "question": "What is a key feature of recurrent neural networks?",
+                  "difficultyLevel": "easy",
+                  "answer": "Information flows in a loop",
+                  "options": [
+                    "Information flows in a loop",
+                    "Information flows in one direction",
+                    "They are used for image recognition",
+                    "They have a fixed number of layers"
+                  ]
+                }
+              }
+            },
+            {
+              "Evolution and Biological Inspiration": {
+                "1": {
+                  "question": "What inspired the development of neural networks?",
+                  "difficultyLevel": "easy",
+                  "answer": "The brain's ability to solve complex problems",
+                  "options": [
+                    "The brain's ability to solve complex problems",
+                    "Advancements in traditional computing",
+                    "Development of new programming languages",
+                    "Increased data storage capabilities"
+                  ]
+                },
+                "2": {
+                  "question": "When did significant advances in neural networks occur?",
+                  "difficultyLevel": "hard",
+                  "answer": "Late 1980s",
+                  "options": [
+                    "Early 1940s",
+                    "Late 1980s",
+                    "Early 2000s",
+                    "Late 1990s"
+                  ]
+                },
+                "3": {
+                  "question": "What function do synapses serve in a neuron?",
+                  "difficultyLevel": "easy",
+                  "answer": "Connect axons to dendrites",
+                  "options": [
+                    "Connect axons to dendrites",
+                    "Process information",
+                    "Transmit electrical signals",
+                    "Store memories"
+                  ]
+                }
+              }
+            },
+            {
+              "Training Methods": {
+                "1": {
+                  "question": "Which learning method involves the network self-organizing based on input features?",
+                  "difficultyLevel": "hard",
+                  "answer": "Unsupervised learning",
+                  "options": [
+                    "Supervised learning",
+                    "Unsupervised learning",
+                    "Reinforcement learning",
+                    "Semi-supervised learning"
+                  ]
+                },
+                "2": {
+                  "question": "What is the primary goal of supervised learning?",
+                  "difficultyLevel": "easy",
+                  "answer": "Adjust weights based on errors",
+                  "options": [
+                    "Adjust weights based on errors",
+                    "Self-organize based on input features",
+                    "Maximize reward signals",
+                    "Minimize training time"
+                  ]
+                },
+                "3": {
+                  "question": "What type of neural network is suitable for time-series forecasting?",
+                  "difficultyLevel": "hard",
+                  "answer": "Recurrent neural networks",
+                  "options": [
+                    "Feedforward neural networks",
+                    "Recurrent neural networks",
+                    "Auto-associative neural networks",
+                    "Convolutional neural networks"
+                  ]
+                }
+              }
+            }
+          ],
+          "bad": [
+            {
+              "Neural Networks": {
+                "question1": {
+                  "question": "What is the color of the sky?",
+                  "difficultyLevel": "easy",
+                  "answer": "Blue",
+                  "options": ["Blue", "Green", "Red", "Yellow"]
+                },
+                "question2": {
+                  "question": "How many continents are there?",
+                  "difficultyLevel": "hard",
+                  "answer": "Seven",
+                  "options": ["Five", "Six", "Seven", "Eight"]
+                },
+                "3": {
+                  "question": "Which is the largest ocean?",
+                  "difficultyLevel": "easy",
+                  "answer": "Pacific Ocean",
+                  "options": [
+                    "Atlantic Ocean",
+                    "Indian Ocean",
+                    "Arctic Ocean",
+                    "Pacific Ocean"
+                  ]
+                }
+              }
+            },
+            {
+              "Neural Networks": {
+                "1": {
+                  "question": "What is it?",
+                  "difficultyLevel": "easy",
+                  "answer": "",
+                  "options": ["", "", "", ""]
+                },
+                "2": {
+                  "question": "Explain the concept.",
+                  "difficultyLevel": "hard",
+                  "answer": "",
+                  "options": ["", "", "", ""]
+                },
+                "3": {
+                  "question": "What do you think?",
+                  "difficultyLevel": "easy",
+                  "answer": "",
+                  "options": ["", "", "", ""]
+                }
+              }
+            }
+          ]
+        }
+      }
+      ''')
     ];
+
     final response = await model.generateContent(content);
     log("${response.text}");
     return "${response.text}";
@@ -184,7 +363,8 @@ class _StudentPageState extends State<Documentupload> {
   }
 
   Widget buildProgressIndicator() {
-    return PopScope(
+    return WillPopScope(
+      onWillPop: () async => false,
       // Prevent dismissing the dialog by tapping outside
       child: Dialog(
         backgroundColor: Colors.black.withOpacity(0.5),
