@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sen_app_latest/new_structure/student/studentlanding.dart';
 import 'package:sen_app_latest/new_structure/teacher/teacherlanding.dart';
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -58,7 +57,9 @@ class LoginPageState extends State<LoginPage> {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => isTeacher
-                ? const TeacherLanding() // Pass the appropriate data here
+                ? TeacherLanding(
+                    username: _usernameController.text,
+                  ) // Pass the appropriate data here
                 : StudentLanding(
                     username: _usernameController.text,
                   ), // Pass the appropriate data here

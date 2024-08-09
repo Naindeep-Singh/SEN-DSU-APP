@@ -28,6 +28,7 @@ dependencies:
   json5: ^0.8.2
   syncfusion_flutter_pdf: ^26.2.8
   flip_card: ^0.7.0
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
