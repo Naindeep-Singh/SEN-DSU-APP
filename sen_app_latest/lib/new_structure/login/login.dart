@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:sen_app_latest/new_structure/student/studentlanding.dart';
-import 'package:sen_app_latest/new_structure/teacher/teacherlanding.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sen_app_latest/new_structure/sen_ui/sen_ui.dart'; // Import SEN UI
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -52,17 +53,15 @@ class LoginPageState extends State<LoginPage> {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
+        // Retrieve the username and userType from Firestore
+        final userData = querySnapshot.docs.first.data() as Map<String, dynamic>;
+        final String username = userData['username'];
+        final String userType = userData['type'];
+
         debugPrint('Login successful');
-        // Ensure navigation is done in a context where Navigator is available
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => isTeacher
-                ? TeacherLanding(
-                    username: _usernameController.text,
-                  ) // Pass the appropriate data here
-                : StudentLanding(
-                    username: _usernameController.text,
-                  ), // Pass the appropriate data here
+            builder: (context) => SENPage(username: username, userType: userType),
           ),
         );
       } else {
@@ -84,7 +83,7 @@ class LoginPageState extends State<LoginPage> {
         'username': _usernameController.text,
         'password': _passwordController.text,
         'email': _emailController.text,
-        'type': isSignUp ? 'student' : 'teacher', // Example type
+        'type': isTeacher ? 'teacher' : 'student',
       });
       debugPrint('Sign up successful');
     } catch (e) {
@@ -93,6 +92,36 @@ class LoginPageState extends State<LoginPage> {
         errorMessage = e.toString();
       });
     }
+  }
+
+  Future<User?> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        // Assume the userType is derived from Firestore based on the email or some other method
+        final String userType = isTeacher ? "teacher" : "student";
+        final String username = user.displayName ?? "User";
+
+        return user;
+      }
+    } catch (e) {
+      print(e);
+      setState(() {
+        errorMessage = e.toString();
+      });
+    }
+    return null;
   }
 
   @override
@@ -162,8 +191,7 @@ class LoginPageState extends State<LoginPage> {
                 ],
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -336,6 +364,23 @@ class LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  User? user = await _signInWithGoogle();
+                  if (user != null) {
+                    final String userType = isTeacher ? "teacher" : "student";
+                    final String username = user.displayName ?? "User";
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => SENPage(username: username, userType: userType),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.login),
+                label: const Text("Sign in with Google"),
               ),
             ],
           ),

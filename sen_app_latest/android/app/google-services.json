@@ -7,12 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:61650632644:android:bc66e0dd1480db6a5a2e91",
+        "mobilesdk_app_id": "1:61650632644:android:96442edb271b283e5a2e91",
         "android_client_info": {
-          "package_name": "com.sen.app"
+          "package_name": "com.example.sen_app_latest"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "61650632644-d0edtdcrpckrk6qjl2tgah14uudcaj2f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCSoQx5iUsHA1UAuW6klTTgHN5OPMJ_etk"
@@ -20,7 +25,63 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "61650632644-d0edtdcrpckrk6qjl2tgah14uudcaj2f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "61650632644-1kbjkjhl1mqrkrrs6ahjs0ph8kp69m9s.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.senAppLatest"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:61650632644:android:bc66e0dd1480db6a5a2e91",
+        "android_client_info": {
+          "package_name": "com.sen.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "61650632644-g37le7vni2u9v1gvt05vjtfe01r65pfv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sen.app",
+            "certificate_hash": "61e4780359cfae7887a1ba58001316ee66d6b96f"
+          }
+        },
+        {
+          "client_id": "61650632644-d0edtdcrpckrk6qjl2tgah14uudcaj2f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSoQx5iUsHA1UAuW6klTTgHN5OPMJ_etk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "61650632644-d0edtdcrpckrk6qjl2tgah14uudcaj2f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "61650632644-1kbjkjhl1mqrkrrs6ahjs0ph8kp69m9s.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.senAppLatest"
+              }
+            }
+          ]
         }
       }
     }

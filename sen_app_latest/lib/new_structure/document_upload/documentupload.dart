@@ -2,15 +2,17 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:sen_app_latest/landing/landingpage.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:json5/json5.dart' as json5;
+import 'package:sen_app_latest/landing/landingpage.dart';
+import 'package:sen_app_latest/landing/landingpage.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DocumentUpload extends StatefulWidget {
-  const DocumentUpload({super.key, required this.username});
   final String username;
+
+  const DocumentUpload({super.key, required this.username});
 
   @override
   State<DocumentUpload> createState() => _DocumentUploadState();
@@ -122,16 +124,13 @@ class _DocumentUploadState extends State<DocumentUpload> {
   }
 
   Future<String> _sendFileToGemini(String extractedtext) async {
-    // Define the mime type for PDF
     log('Entered send file to gemini');
-    const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc';
-    // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
+    const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc'; // Replace with your actual API key
     final model = GenerativeModel(
         model: 'gemini-1.5-pro',
         apiKey: apiKey,
         generationConfig:
             GenerationConfig(responseMimeType: "application/json"));
-    // Create the content to send to Gemini
     final content = [
       Content.text('''
       {
@@ -365,7 +364,6 @@ class _DocumentUploadState extends State<DocumentUpload> {
   Widget buildProgressIndicator() {
     return WillPopScope(
       onWillPop: () async => false,
-      // Prevent dismissing the dialog by tapping outside
       child: Dialog(
         backgroundColor: Colors.black.withOpacity(0.5),
         child: const Padding(
@@ -406,14 +404,18 @@ class _DocumentUploadState extends State<DocumentUpload> {
         .get();
     List<DocumentSnapshot> docs = querySnapshot.docs;
     message = 'File processed and sent to Gemini successfully';
-    for (var doc in docs) {
-      var data = doc.data() as Map<String, dynamic>;
-      tempTopics.add(buildDocuments(
-          data['documentname'], json5.json5Decode(data['documenttext'])));
+    try {
+      for (var doc in docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        tempTopics.add(buildDocuments(
+            data['documentname'], json5.json5Decode(data['documenttext'])));
+      }
+      setState(() {
+        topics.addAll(tempTopics);
+      });
+    } catch (e) {
+      log('$e');
     }
-    setState(() {
-      topics.addAll(tempTopics);
-    });
   }
 
   @override

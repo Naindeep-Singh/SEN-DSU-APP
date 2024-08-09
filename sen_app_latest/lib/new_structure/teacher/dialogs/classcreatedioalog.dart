@@ -19,10 +19,10 @@ class ClassFormDialogState extends State<ClassFormDialog> {
   String generatedCode = "";
 
   String _generateRandomCode(int length) {
-    const _chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-    Random _rnd = Random();
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+    Random rnd = Random();
     return String.fromCharCodes(Iterable.generate(
-        length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+        length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
   }
 
   Future<void> _submitData() async {

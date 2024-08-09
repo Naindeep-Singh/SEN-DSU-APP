@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCSoQx5iUsHA1UAuW6klTTgHN5OPMJ_etk',
-    appId: '1:61650632644:android:bc66e0dd1480db6a5a2e91',
+    appId: '1:61650632644:android:96442edb271b283e5a2e91',
     messagingSenderId: '61650632644',
     projectId: 'sen-app-76a99',
     storageBucket: 'sen-app-76a99.appspot.com',
@@ -64,6 +64,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '61650632644',
     projectId: 'sen-app-76a99',
     storageBucket: 'sen-app-76a99.appspot.com',
+    androidClientId: '61650632644-g37le7vni2u9v1gvt05vjtfe01r65pfv.apps.googleusercontent.com',
+    iosClientId: '61650632644-1kbjkjhl1mqrkrrs6ahjs0ph8kp69m9s.apps.googleusercontent.com',
     iosBundleId: 'com.example.senAppLatest',
   );
 
@@ -73,6 +75,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '61650632644',
     projectId: 'sen-app-76a99',
     storageBucket: 'sen-app-76a99.appspot.com',
+    androidClientId: '61650632644-g37le7vni2u9v1gvt05vjtfe01r65pfv.apps.googleusercontent.com',
+    iosClientId: '61650632644-1kbjkjhl1mqrkrrs6ahjs0ph8kp69m9s.apps.googleusercontent.com',
     iosBundleId: 'com.example.senAppLatest',
   );
 
