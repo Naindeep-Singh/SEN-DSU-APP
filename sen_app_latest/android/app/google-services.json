@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "177356128094",
-    "project_id": "sen-app-1993e",
-    "storage_bucket": "sen-app-1993e.appspot.com"
+    "project_number": "61650632644",
+    "project_id": "sen-app-76a99",
+    "storage_bucket": "sen-app-76a99.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:177356128094:android:37b6081b720b5bb3fad9cf",
+        "mobilesdk_app_id": "1:61650632644:android:bc66e0dd1480db6a5a2e91",
         "android_client_info": {
-          "package_name": "com.example.sen_app_latest"
+          "package_name": "com.sen.app"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA7PNjlm06I8d5LtDo9J5wwa1JCV4gVOig"
+          "current_key": "AIzaSyCSoQx5iUsHA1UAuW6klTTgHN5OPMJ_etk"
         }
       ],
       "services": {

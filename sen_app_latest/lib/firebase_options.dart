@@ -41,48 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBnQ8xQ7gBcISAHHObpKwpLg4IrS-u7He8',
-    appId: '1:177356128094:web:f30a43aa676f0638fad9cf',
-    messagingSenderId: '177356128094',
-    projectId: 'sen-app-1993e',
-    authDomain: 'sen-app-1993e.firebaseapp.com',
-    storageBucket: 'sen-app-1993e.appspot.com',
-    measurementId: 'G-S8WB7XBLPZ',
+    apiKey: 'AIzaSyDUQvBELu7zWTRn_r-nyFRvKMl1EuRMVgc',
+    appId: '1:61650632644:web:614865e33fdeacc05a2e91',
+    messagingSenderId: '61650632644',
+    projectId: 'sen-app-76a99',
+    authDomain: 'sen-app-76a99.firebaseapp.com',
+    storageBucket: 'sen-app-76a99.appspot.com',
+    measurementId: 'G-5Y0NHB2TS6',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA7PNjlm06I8d5LtDo9J5wwa1JCV4gVOig',
-    appId: '1:177356128094:android:37b6081b720b5bb3fad9cf',
-    messagingSenderId: '177356128094',
-    projectId: 'sen-app-1993e',
-    storageBucket: 'sen-app-1993e.appspot.com',
+    apiKey: 'AIzaSyCSoQx5iUsHA1UAuW6klTTgHN5OPMJ_etk',
+    appId: '1:61650632644:android:bc66e0dd1480db6a5a2e91',
+    messagingSenderId: '61650632644',
+    projectId: 'sen-app-76a99',
+    storageBucket: 'sen-app-76a99.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAxFl_7gvSVBMBf3GjwVB1WlA33IVtGC6s',
-    appId: '1:177356128094:ios:ae89d650077e5c02fad9cf',
-    messagingSenderId: '177356128094',
-    projectId: 'sen-app-1993e',
-    storageBucket: 'sen-app-1993e.appspot.com',
+    apiKey: 'AIzaSyCG7hgFLYmdGaw-o7qaPIlff7UnAJ70h5w',
+    appId: '1:61650632644:ios:b589d3d7bd098adf5a2e91',
+    messagingSenderId: '61650632644',
+    projectId: 'sen-app-76a99',
+    storageBucket: 'sen-app-76a99.appspot.com',
     iosBundleId: 'com.example.senAppLatest',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAxFl_7gvSVBMBf3GjwVB1WlA33IVtGC6s',
-    appId: '1:177356128094:ios:ae89d650077e5c02fad9cf',
-    messagingSenderId: '177356128094',
-    projectId: 'sen-app-1993e',
-    storageBucket: 'sen-app-1993e.appspot.com',
+    apiKey: 'AIzaSyCG7hgFLYmdGaw-o7qaPIlff7UnAJ70h5w',
+    appId: '1:61650632644:ios:b589d3d7bd098adf5a2e91',
+    messagingSenderId: '61650632644',
+    projectId: 'sen-app-76a99',
+    storageBucket: 'sen-app-76a99.appspot.com',
     iosBundleId: 'com.example.senAppLatest',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBnQ8xQ7gBcISAHHObpKwpLg4IrS-u7He8',
-    appId: '1:177356128094:web:2346690a9eb22b89fad9cf',
-    messagingSenderId: '177356128094',
-    projectId: 'sen-app-1993e',
-    authDomain: 'sen-app-1993e.firebaseapp.com',
-    storageBucket: 'sen-app-1993e.appspot.com',
-    measurementId: 'G-9Q38KCNB5Y',
+    apiKey: 'AIzaSyDUQvBELu7zWTRn_r-nyFRvKMl1EuRMVgc',
+    appId: '1:61650632644:web:7bb7b081796d11ad5a2e91',
+    messagingSenderId: '61650632644',
+    projectId: 'sen-app-76a99',
+    authDomain: 'sen-app-76a99.firebaseapp.com',
+    storageBucket: 'sen-app-76a99.appspot.com',
+    measurementId: 'G-980R2H4717',
   );
+
 }
