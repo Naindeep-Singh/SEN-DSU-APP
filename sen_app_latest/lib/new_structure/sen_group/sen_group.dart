@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -68,6 +71,48 @@ class SenGroupPageState extends State<SenGroupPage> {
       ),
       margin: const EdgeInsets.only(top: 0.0),
     ));
+  }
+
+  // Function to extract all text from the session
+  String getAllSessionText() {
+    List<String> sessionText = [];
+
+    for (var widget in contentList) {
+      if (widget is Padding && widget.child is Text) {
+        sessionText.add((widget.child as Text).data ?? '');
+      }
+    }
+
+    return sessionText.join("\n");
+  }
+
+  Future<String> getSummary(
+      String extractedText, String additionalNotes) async {
+    log('getting summary from Gemini');
+    const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc';
+    final model = GenerativeModel(
+        model: 'gemini-1.5-pro',
+        apiKey: apiKey,
+        generationConfig: GenerationConfig(
+            responseMimeType: "text/plain")); // Request plain text
+
+    final content = [
+      Content.text('''
+    {
+      "instructions": [
+        "Here is a summary of the session. Please read it carefully and then enhance it with the additional notes.",
+        "Generate a concise summary of the session text, and integrate the additional notes to provide a comprehensive overview.",
+        "Output the summary as a simple string without JSON formatting."
+      ],
+      "text": "$extractedText",
+      "additionalNotes": "$additionalNotes"
+    }
+    ''')
+    ];
+
+    final response = await model.generateContent(content);
+    log("${response.text}");
+    return "${response.text}";
   }
 
   Future<void> _loadSessionFromFirebase() async {
@@ -265,8 +310,10 @@ class SenGroupPageState extends State<SenGroupPage> {
 
     try {
       await _saveSessionToFirebase(); // Save session before summarizing
-      summaryResponse = await _getSummaryFromGemini(content, sessionImages);
-      print(summaryResponse);
+      summaryResponse = await getSummary(getAllSessionText(), content);
+      await _saveTextToFirebase('$summaryResponse', 'Gemini');
+      await _loadSessionFromFirebase();
+      debugPrint(summaryResponse);
     } catch (e) {
       summaryResponse = "Failed to generate summary.";
     } finally {
@@ -275,32 +322,6 @@ class SenGroupPageState extends State<SenGroupPage> {
       });
 
       _showSummaryPanel();
-    }
-  }
-
-  Future<String> _getSummaryFromGemini(
-      String content, List<String> images) async {
-    final url = Uri.parse('https://api.your-service.com/generate-summary');
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode({
-        'model': model,
-        'input': {
-          'text': content,
-          'images': images,
-        },
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data['summary'];
-    } else {
-      throw Exception('Failed to load summary');
     }
   }
 
@@ -467,10 +488,10 @@ class SenGroupPageState extends State<SenGroupPage> {
                               globalText, widget.username);
                           await _loadSessionFromFirebase();
                         },
-                        child: const Text('Save'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.teal,
                         ),
+                        child: const Text('Save'),
                       ),
                     ],
                   ),
@@ -515,15 +536,15 @@ class SenGroupPageState extends State<SenGroupPage> {
                             children: [
                               ElevatedButton(
                                 onPressed: _summarizeSession,
-                                child: const Text('Generate Summary'),
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.teal),
+                                child: const Text('Generate Summary'),
                               ),
                               ElevatedButton(
                                 onPressed: _toggleBottomSheet,
-                                child: const Text('Cancel'),
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red),
+                                child: const Text('Cancel'),
                               ),
                             ],
                           ),
