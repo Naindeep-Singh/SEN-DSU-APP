@@ -1,164 +1,94 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:developer' as dev;
+
 import 'package:intl/intl.dart';
+import 'package:sen_app_latest/new_structure/teacher/dialogs/vivadialogs.dart';
 
 class TeacherViva extends StatefulWidget {
-  const TeacherViva({super.key, required this.classData});
+  const TeacherViva(
+      {super.key, required this.classData, required this.username});
   final Map classData;
+  final String username;
 
   @override
   TeacherVivaState createState() => TeacherVivaState();
 }
 
 class TeacherVivaState extends State<TeacherViva> {
-  // List of classes
-  final List<Map<String, String>> vivas = [
-    {
-      'vivaName': 'Viva 1',
-      'start': '2024-08-07 10:40',
-      'end': '2024-08-09 10:40'
-    },
-    {
-      'vivaName': 'Viva 2',
-      'start': '2024-08-07 10:40',
-      'end': '2024-08-09 10:40'
-    },
-    {
-      'vivaName': 'Viva 3',
-      'start': '2024-08-07 10:40',
-      'end': '2024-08-09 10:40'
-    },
-    {
-      'vivaName': 'Viva 4',
-      'start': '2024-08-07 10:40',
-      'end': '2024-08-09 10:40'
-    },
-  ];
+  // List of vivas
+  List<Widget> viva = [];
 
-  void _addViva() async {
-    String? title;
-    DateTime? startDate;
-    DateTime? endDate;
+  Future<void> fetchVivaDetails() async {
+    List<Widget> tempViva = [];
+    viva = [];
 
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text("Add Viva"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    decoration: const InputDecoration(labelText: "Title"),
-                    onChanged: (value) {
-                      title = value;
-                    },
-                  ),
-                  TextField(
-                    decoration: const InputDecoration(labelText: "Start Date"),
-                    readOnly: true,
-                    onTap: () async {
-                      DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2101),
-                      );
-                      if (pickedDate != null) {
-                        TimeOfDay? pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay.fromDateTime(DateTime.now()),
-                        );
-                        if (pickedTime != null) {
-                          setState(() {
-                            startDate = DateTime(
-                              pickedDate.year,
-                              pickedDate.month,
-                              pickedDate.day,
-                              pickedTime.hour,
-                              pickedTime.minute,
-                            );
-                          });
-                        }
-                      }
-                    },
-                    controller: TextEditingController(
-                      text: startDate != null
-                          ? DateFormat('yyyy-MM-dd HH:mm').format(startDate!)
-                          : '',
-                    ),
-                  ),
-                  TextField(
-                    decoration: const InputDecoration(labelText: "End Date"),
-                    readOnly: true,
-                    onTap: () async {
-                      DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2101),
-                      );
-                      if (pickedDate != null) {
-                        TimeOfDay? pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay.fromDateTime(DateTime.now()),
-                        );
-                        if (pickedTime != null) {
-                          setState(() {
-                            endDate = DateTime(
-                              pickedDate.year,
-                              pickedDate.month,
-                              pickedDate.day,
-                              pickedTime.hour,
-                              pickedTime.minute,
-                            );
-                          });
-                        }
-                      }
-                    },
-                    controller: TextEditingController(
-                      text: endDate != null
-                          ? DateFormat('yyyy-MM-dd HH:mm').format(endDate!)
-                          : '',
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () {
-                    if (title != null && startDate != null && endDate != null) {
-                      setState(
-                          () {}); // Only to update local state in the dialog
-                      Navigator.of(context).pop(
-                          {'title': title, 'start': startDate, 'end': endDate});
-                    }
-                  },
-                  child: const Text("Add"),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    ).then((result) {
-      if (result != null) {
-        setState(() {
-          vivas.add({
-            'vivaName': result['title'],
-            'start': DateFormat('yyyy-MM-dd HH:mm').format(result['start']),
-            'end': DateFormat('yyyy-MM-dd HH:mm').format(result['end']),
-          });
-        });
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('viva')
+          .where('teacher', isEqualTo: widget.classData['teacher'])
+          .where('code', isEqualTo: widget.classData['code'])
+          .get();
+
+      List<DocumentSnapshot> docs = querySnapshot.docs;
+      dev.log('$docs');
+
+      for (var doc in docs) {
+        var data = doc.data() as Map<String, dynamic>;
+
+        // Convert the Firestore timestamp to a DateTime object
+        Timestamp startTimestamp = data['start'] as Timestamp;
+        Timestamp endTimestamp = data['end'] as Timestamp;
+
+        DateTime startDate = startTimestamp.toDate();
+        DateTime endDate = endTimestamp.toDate();
+
+        // Format the DateTime object to a string
+        String formattedStart =
+            DateFormat('dd-MM-yy HH:mm:ss').format(startDate);
+        String formattedEnd = DateFormat('dd-MM-yy HH:mm:ss').format(endDate);
+
+        // Pass the formatted string to the buildViva function
+        tempViva.add(buildViva(data['vivaname'], formattedStart, formattedEnd));
       }
-    });
+      setState(() {
+        viva.addAll(tempViva);
+      });
+    } catch (e) {
+      dev.log('Failed to fetch Viva details: $e');
+    }
+  }
+
+  Widget buildViva(String vivaname, String start, String end) {
+    return Card(
+      margin: const EdgeInsets.all(10.0),
+      child: ListTile(
+        title: Text(vivaname),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text('Start: '),
+                Text(start),
+              ],
+            ),
+            Row(
+              children: [
+                const Text('End: '),
+                Text(end),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchVivaDetails();
   }
 
   @override
@@ -168,41 +98,44 @@ class TeacherVivaState extends State<TeacherViva> {
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.greenAccent,
-          title: const Text('Viva'),
+          title: Text(widget.classData['classname']),
+          leading: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Icon(Icons.arrow_back)),
           actions: [
             IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: _addViva,
-            )
+                icon: const Icon(Icons.add),
+                onPressed: () async {
+                  await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return VivaDialog(
+                        username: widget.username,
+                        classData: widget.classData,
+                      );
+                    },
+                  ).then((result) {
+                    if (result != null) {
+                      // Handle the creation of the Viva with the returned data
+                      dev.log('Viva created with: $result');
+                      fetchVivaDetails();
+                      // You can add the viva data to your list or send it to Firestore here
+                    }
+                  });
+                })
           ],
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: vivas.map((vivaInfo) {
-              return Card(
-                margin: const EdgeInsets.all(10.0),
-                child: ListTile(
-                  title: Text(vivaInfo['vivaName']!),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Text('Start: '),
-                          Text(vivaInfo['start']!),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Text('End: '),
-                          Text(vivaInfo['end']!),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+        body: Center(
+          child: ListView.builder(
+            itemCount: viva.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: viva[index],
               );
-            }).toList(),
+            },
           ),
         ),
       ),

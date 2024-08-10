@@ -4,10 +4,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:json5/json5.dart' as json5;
-import 'package:sen_app_latest/landing/landingpage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sen_app_latest/landing/landingpage.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
 
 class DocumentUpload extends StatefulWidget {
   final String username;
@@ -24,7 +24,6 @@ class _DocumentUploadState extends State<DocumentUpload> {
   List<Widget> topics = [];
 
   Future<void> _pickFileAndUpload() async {
-    // Pick a file
     List<Widget> tempTopics = [];
 
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -60,7 +59,7 @@ class _DocumentUploadState extends State<DocumentUpload> {
 
         // Test if we get correctly formatted string
         var test = json5.json5Decode(geminiResponse);
-        log('ITS FORMATTED!');
+        log('JSON is formatted correctly.');
         snackbarMsg("File Uploaded Successfully!", Colors.teal);
 
         await FirebaseFirestore.instance.collection('documents').add({
@@ -79,16 +78,15 @@ class _DocumentUploadState extends State<DocumentUpload> {
         message = 'File processed and sent to Gemini successfully';
         for (var doc in docs) {
           var data = doc.data() as Map<String, dynamic>;
-          tempTopics.add(buildDocuments(
-              data['documentname'], json5.json5Decode(data['documenttext'])));
+          tempTopics.add(buildDocuments(data['documentname'],
+              json5.json5Decode(data['documenttext']), doc.id));
         }
         setState(() {
           topics.addAll(tempTopics);
         });
       } catch (e) {
-        log('$e');
-        snackbarMsg(
-            "File Upload Failed!", const Color.fromRGBO(240, 13, 13, 0.61));
+        log('Error during upload: $e');
+        snackbarMsg("File Upload Failed: $e", Colors.red);
         setState(() {
           message = 'File upload failed: $e';
         });
@@ -108,24 +106,20 @@ class _DocumentUploadState extends State<DocumentUpload> {
   }
 
   String preprocessText(String text) {
-    // Remove any unwanted characters or control characters
     String cleanedText = text
-        .replaceAll(RegExp(r'\s+'),
-            ' ') // Replace multiple whitespace with a single space
-        .replaceAll(RegExp(r'[^\x20-\x7E]'),
-            '') // Remove non-printable ASCII characters
-        .trim(); // Remove leading and trailing whitespace
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .replaceAll(RegExp(r'[^\x20-\x7E]'), '')
+        .trim();
 
-    // Escape JSON special characters
-    cleanedText = cleanedText.replaceAll('"', r'\"'); // Escape double quotes
-    cleanedText = cleanedText.replaceAll('\\', r'\\'); // Escape backslashes
+    cleanedText = cleanedText.replaceAll('"', r'\"');
+    cleanedText = cleanedText.replaceAll('\\', r'\\');
 
     return cleanedText;
   }
 
   Future<String> _sendFileToGemini(String extractedtext) async {
-    log('Entered send file to gemini');
-    const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc'; // Replace with your actual API key
+    log('Sending file to Gemini');
+    const apiKey = 'Your-API-Key-Here';
     final model = GenerativeModel(
         model: 'gemini-1.5-pro',
         apiKey: apiKey,
@@ -183,80 +177,6 @@ class _DocumentUploadState extends State<DocumentUpload> {
                   ]
                 }
               }
-            },
-            {
-              "Evolution and Biological Inspiration": {
-                "1": {
-                  "question": "What inspired the development of neural networks?",
-                  "difficultyLevel": "easy",
-                  "answer": "The brain's ability to solve complex problems",
-                  "options": [
-                    "The brain's ability to solve complex problems",
-                    "Advancements in traditional computing",
-                    "Development of new programming languages",
-                    "Increased data storage capabilities"
-                  ]
-                },
-                "2": {
-                  "question": "When did significant advances in neural networks occur?",
-                  "difficultyLevel": "hard",
-                  "answer": "Late 1980s",
-                  "options": [
-                    "Early 1940s",
-                    "Late 1980s",
-                    "Early 2000s",
-                    "Late 1990s"
-                  ]
-                },
-                "3": {
-                  "question": "What function do synapses serve in a neuron?",
-                  "difficultyLevel": "easy",
-                  "answer": "Connect axons to dendrites",
-                  "options": [
-                    "Connect axons to dendrites",
-                    "Process information",
-                    "Transmit electrical signals",
-                    "Store memories"
-                  ]
-                }
-              }
-            },
-            {
-              "Training Methods": {
-                "1": {
-                  "question": "Which learning method involves the network self-organizing based on input features?",
-                  "difficultyLevel": "hard",
-                  "answer": "Unsupervised learning",
-                  "options": [
-                    "Supervised learning",
-                    "Unsupervised learning",
-                    "Reinforcement learning",
-                    "Semi-supervised learning"
-                  ]
-                },
-                "2": {
-                  "question": "What is the primary goal of supervised learning?",
-                  "difficultyLevel": "easy",
-                  "answer": "Adjust weights based on errors",
-                  "options": [
-                    "Adjust weights based on errors",
-                    "Self-organize based on input features",
-                    "Maximize reward signals",
-                    "Minimize training time"
-                  ]
-                },
-                "3": {
-                  "question": "What type of neural network is suitable for time-series forecasting?",
-                  "difficultyLevel": "hard",
-                  "answer": "Recurrent neural networks",
-                  "options": [
-                    "Feedforward neural networks",
-                    "Recurrent neural networks",
-                    "Auto-associative neural networks",
-                    "Convolutional neural networks"
-                  ]
-                }
-              }
             }
           ],
           "bad": [
@@ -267,45 +187,6 @@ class _DocumentUploadState extends State<DocumentUpload> {
                   "difficultyLevel": "easy",
                   "answer": "Blue",
                   "options": ["Blue", "Green", "Red", "Yellow"]
-                },
-                "question2": {
-                  "question": "How many continents are there?",
-                  "difficultyLevel": "hard",
-                  "answer": "Seven",
-                  "options": ["Five", "Six", "Seven", "Eight"]
-                },
-                "3": {
-                  "question": "Which is the largest ocean?",
-                  "difficultyLevel": "easy",
-                  "answer": "Pacific Ocean",
-                  "options": [
-                    "Atlantic Ocean",
-                    "Indian Ocean",
-                    "Arctic Ocean",
-                    "Pacific Ocean"
-                  ]
-                }
-              }
-            },
-            {
-              "Neural Networks": {
-                "1": {
-                  "question": "What is it?",
-                  "difficultyLevel": "easy",
-                  "answer": "",
-                  "options": ["", "", "", ""]
-                },
-                "2": {
-                  "question": "Explain the concept.",
-                  "difficultyLevel": "hard",
-                  "answer": "",
-                  "options": ["", "", "", ""]
-                },
-                "3": {
-                  "question": "What do you think?",
-                  "difficultyLevel": "easy",
-                  "answer": "",
-                  "options": ["", "", "", ""]
                 }
               }
             }
@@ -320,59 +201,87 @@ class _DocumentUploadState extends State<DocumentUpload> {
     return "${response.text}";
   }
 
-  Widget buildDocuments(String name, dynamic data) {
-    topics = [];
-    return ListTile(
-      leading: const Icon(
-        Icons.batch_prediction,
-        color: Colors.amber,
+  Widget buildDocuments(String name, dynamic data, String docId) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
       ),
-      title: Center(
-        child: Text(
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: const Icon(
+          Icons.picture_as_pdf,
+          color: Colors.redAccent,
+          size: 36,
+        ),
+        title: Text(
           name,
           style: const TextStyle(
-            fontSize: 15,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
           ),
         ),
-      ),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Lander(
-              data: data,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.delete_forever, color: Colors.red, size: 28),
+              onPressed: () => _deleteDocument(docId),
+              tooltip: "Delete Document",
             ),
-          ),
-        );
-      },
-      shape: const RoundedRectangleBorder(
-        side: BorderSide(color: Colors.black, width: 2),
-        borderRadius: BorderRadius.all(Radius.circular(25)),
-      ),
-      trailing: GestureDetector(
-        child: Icon(
-          Icons.arrow_forward,
-          color: Colors.red.shade600,
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.grey.shade600,
+            ),
+          ],
         ),
         onTap: () {
-          debugPrint("arrow forward tapped");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Lander(
+                data: data,
+              ),
+            ),
+          );
         },
       ),
     );
+  }
+
+  Future<void> _deleteDocument(String docId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('documents')
+          .doc(docId)
+          .delete();
+      snackbarMsg("Document deleted successfully!", Colors.teal);
+      setState(() {
+        topics.removeWhere((widget) =>
+            (widget as Card).key == ValueKey(docId)); // Update the UI
+      });
+    } catch (e) {
+      log('Failed to delete document: $e');
+      snackbarMsg("Failed to delete document!", Colors.red);
+    }
   }
 
   Widget buildProgressIndicator() {
     return WillPopScope(
       onWillPop: () async => false,
       child: Dialog(
-        backgroundColor: Colors.black.withOpacity(0.5),
+        backgroundColor: Colors.black.withOpacity(0.7),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
         child: const Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(16), // Reduce padding to make it smaller
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               CircularProgressIndicator(),
-              SizedBox(width: 16),
+              SizedBox(width: 16), // Reduce space between elements
               Text('Uploading...', style: TextStyle(color: Colors.white)),
             ],
           ),
@@ -382,6 +291,7 @@ class _DocumentUploadState extends State<DocumentUpload> {
   }
 
   void snackbarMsg(String errorMessage, Color color) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Prevent duplication
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       backgroundColor: color,
       duration: const Duration(seconds: 3),
@@ -390,7 +300,7 @@ class _DocumentUploadState extends State<DocumentUpload> {
         child: Text(
           errorMessage,
           style: const TextStyle(
-              color: Colors.black, fontWeight: FontWeight.w500, fontSize: 15),
+              color: Colors.white, fontWeight: FontWeight.w500, fontSize: 16),
         ),
       ),
     ));
@@ -402,13 +312,12 @@ class _DocumentUploadState extends State<DocumentUpload> {
         .collection('documents')
         .where('username', isEqualTo: widget.username)
         .get();
-    List<DocumentSnapshot> docs = querySnapshot.docs;
     message = 'File processed and sent to Gemini successfully';
     try {
-      for (var doc in docs) {
+      for (var doc in querySnapshot.docs) {
         var data = doc.data() as Map<String, dynamic>;
-        tempTopics.add(buildDocuments(
-            data['documentname'], json5.json5Decode(data['documenttext'])));
+        tempTopics.add(buildDocuments(data['documentname'],
+            json5.json5Decode(data['documenttext']), doc.id));
       }
       setState(() {
         topics.addAll(tempTopics);
@@ -433,25 +342,42 @@ class _DocumentUploadState extends State<DocumentUpload> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Center(child: Text("Document Upload")),
-      ),
-      body: Center(
-        child: ListView.builder(
-          itemCount: topics.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: topics[index],
-            );
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _pickFileAndUpload,
-        tooltip: 'Upload',
-        child: const Icon(Icons.upload_file),
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: topics.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return topics[index];
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0), // Reduced padding
+                child: FloatingActionButton.extended(
+                  onPressed: _pickFileAndUpload,
+                  label: const Text('Upload Document'),
+                  icon: const Icon(Icons.upload_file),
+                  backgroundColor: Colors.teal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0), // Slightly reduced radius
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (isUploading)
+            Center(
+              child: Lottie.network(
+                'https://lottie.host/bf54bc22-5ef0-44db-872f-6c859e16384d/OXWwJtv9g5.json',
+                height: 80, // Adjusted size to be slightly smaller
+                width: 80,
+              ),
+            ),
+        ],
       ),
     );
   }

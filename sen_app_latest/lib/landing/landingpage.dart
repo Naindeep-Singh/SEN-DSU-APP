@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sen_app_latest/main.dart';
-import 'package:sen_app_latest/teacher/teacher.dart';
 
 class Lander extends StatefulWidget {
   final Map data;
@@ -13,84 +12,27 @@ class Lander extends StatefulWidget {
 
 class _LanderState extends State<Lander> {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('SEN NET'),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: Stack(
-        children: <Widget>[
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text(
-                  'Welcome',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.deepPurple,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 15),
-                    textStyle: const TextStyle(fontSize: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    elevation: 5,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TeacherPage(
-                          data: widget.data, // Pass the appropriate data here
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('Teacher'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.deepPurple,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 15),
-                    textStyle: const TextStyle(fontSize: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    elevation: 5,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MyHomePage(
-                          title: "Student",
-                          data: widget.data,
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('Student'),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
+  void initState() {
+    super.initState();
+    // Directly navigate to the Student login page without showing the Lander screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MyHomePage(
+            title: "Student",
+            data: widget.data,
           ),
-        ],
-      ),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // This build method will never be called because we're directly navigating to the Student login page
+    return Container(
+      color: Colors.black, // Set a background color in case the build method is ever called
     );
   }
 }
@@ -109,12 +51,53 @@ class _WebViewScreenState extends State<WebViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('PDF - AI'),
-        backgroundColor: Colors.deepPurple,
+        title: const Text(
+          'PDF - AI',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.orange, // Updated to match the document upload style
+        centerTitle: true,
+        elevation: 0, // Smooth, flat look for the app bar
       ),
-      body: Center(
-        child: Text('Redirecting to ${widget.url} with data: ${widget.data}'),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.picture_as_pdf,
+                color: Colors.orange,
+                size: 100,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Redirecting to ${widget.url}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Data: ${widget.data}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

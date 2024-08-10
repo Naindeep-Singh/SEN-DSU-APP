@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:sen_app_latest/new_structure/document_upload/documentupload.dart';
+import 'package:sen_app_latest/new_structure/community/community.dart';
 import 'package:sen_app_latest/new_structure/profile/profile.dart';
-import 'package:sen_app_latest/new_structure/student/studentlanding.dart';
+import 'package:sen_app_latest/new_structure/student/studentlanding.dart'; // Ensure correct import path
+import 'package:sen_app_latest/new_structure/teacher/teacherlanding.dart'; // Import TeacherLanding
+import 'package:sen_app_latest/new_structure/teacher/session/session.dart'; // Import Teacher's Session page
 
 class SENPage extends StatefulWidget {
   final String username;
@@ -15,33 +19,74 @@ class SENPage extends StatefulWidget {
 }
 
 class _SENPageState extends State<SENPage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0;  // Default index to the first tab
 
-  List<Widget> get _widgetOptions => [
-        StudentLanding(username: widget.username), // Home Page (Classroom)
-        DocumentUpload(username: widget.username), // Viva Page (Document Upload)
-        ProfilePage(
-            userType: widget.userType, username: widget.username), // Profile Page
+  // List of widgets corresponding to each bottom navigation item
+  List<Widget> get _widgetOptions {
+    if (widget.userType == 'teacher') {
+      return [
+        TeacherLanding(username: widget.username), // Teacher's Landing Page (Groups)
+        SessionLanding(username: widget.username, email: '',),  // Teacher's Session page (Exam)
+        CommunityPage(username: widget.username),
+        ProfilePage(userType: widget.userType, username: widget.username),
       ];
+    } else {
+      return [
+        StudentLanding(username: widget.username, email: ''), // Student's Landing Page (Groups)
+        DocumentUpload(username: widget.username),  // Viva - Ai linked to DocumentUpload (Exam)
+        CommunityPage(username: widget.username),
+        ProfilePage(userType: widget.userType, username: widget.username),
+      ];
+    }
+  }
+
+  // Bottom navigation bar items configuration
+  List<BottomNavigationBarItem> get _bottomNavBarItems {
+    if (widget.userType == 'teacher') {
+      return const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.group),
+          label: 'Exam', // Teachers see "Groups" here
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.description),
+          label: 'Groups', // Teachers see "Exam" here
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.group),
+          label: 'Community',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ];
+    } else {
+      return const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Groups', // Students see "Groups" here
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.description),
+          label: 'Viva - Ai', // Students see "Viva - Ai" here
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.group),
+          label: 'Community',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ];
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-  }
-
-  Widget _buildFloatingActionButton() {
-    if (_selectedIndex == 0) {
-      return FloatingActionButton(
-        onPressed: () {
-          // Handle creation action for Classroom
-        },
-        backgroundColor: Colors.teal,
-        child: const Icon(Icons.add, color: Colors.black),
-      );
-    } else {
-      return Container(); // No FAB on other pages
-    }
   }
 
   @override
@@ -51,49 +96,37 @@ class _SENPageState extends State<SENPage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        title: const Text(
-          'SEN',
-          style: TextStyle(
-            color: Colors.teal,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            Text(
+              'SEN',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                foreground: Paint()
+                  ..shader = const LinearGradient(
+                    colors: <Color>[
+                      Color(0xFF00B4DB),
+                      Color(0xFF0083B0),
+                    ],
+                  ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Lottie.network(
+              'https://lottie.host/bf54bc22-5ef0-44db-872f-6c859e16384d/OXWwJtv9g5.json',
+              height: 40,
+              width: 40,
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.teal),
-            onPressed: () {
-              // Handle search action
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.teal),
-            onPressed: () {
-              // Handle more action
-            },
-          ),
-        ],
       ),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
-      floatingActionButton: _buildFloatingActionButton(),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Classroom',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.description),
-            label: 'Viva',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+        items: _bottomNavBarItems,
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.teal,
         unselectedItemColor: Colors.grey,

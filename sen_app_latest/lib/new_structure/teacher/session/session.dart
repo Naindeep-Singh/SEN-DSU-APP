@@ -4,16 +4,16 @@ import 'package:lottie/lottie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sen_app_latest/new_structure/sen_group/sen_group.dart';
 
-class StudentLanding extends StatefulWidget {
-  const StudentLanding({super.key, required this.username, required this.email});
+class SessionLanding extends StatefulWidget {
+  const SessionLanding({super.key, required this.username, required this.email});
   final String username;
   final String email;
 
   @override
-  _StudentLandingState createState() => _StudentLandingState();
+  _SessionLandingState createState() => _SessionLandingState();
 }
 
-class _StudentLandingState extends State<StudentLanding> {
+class _SessionLandingState extends State<SessionLanding> {
   final List<Map<String, String?>> sessions = [];
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _joinController = TextEditingController();

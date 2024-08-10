@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
-
 import 'package:flutter/services.dart';
 
 class ClassFormDialog extends StatefulWidget {
@@ -19,10 +18,10 @@ class ClassFormDialogState extends State<ClassFormDialog> {
   String generatedCode = "";
 
   String _generateRandomCode(int length) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-    Random rnd = Random();
+    const _chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+    Random _rnd = Random();
     return String.fromCharCodes(Iterable.generate(
-        length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+        length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
   }
 
   Future<void> _submitData() async {
@@ -32,14 +31,45 @@ class ClassFormDialogState extends State<ClassFormDialog> {
         generatedCode = _generateRandomCode(10);
       });
 
-      // Send data to Firestore
-      await FirebaseFirestore.instance.collection('classes').add({
-        'classname': _classNameController.text,
-        'description': _descriptionController.text,
-        'code': generatedCode,
-        'timestamp': FieldValue.serverTimestamp(),
-        'teacher': widget.username
-      });
+      try {
+        // Send data to Firestore and get the document reference
+        DocumentReference classDocRef = await FirebaseFirestore.instance
+            .collection('classes')
+            .add({
+          'classname': _classNameController.text,
+          'description': _descriptionController.text,
+          'code': generatedCode,
+          'timestamp': FieldValue.serverTimestamp(),
+          'teacher': widget.username
+        });
+
+        // Get the teacher document
+        QuerySnapshot teacherSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .where('username', isEqualTo: widget.username)
+            .where('type', isEqualTo: 'teacher')
+            .get();
+
+        if (teacherSnapshot.docs.isNotEmpty) {
+          DocumentSnapshot teacherDoc = teacherSnapshot.docs.first;
+
+          // Update the 'classes' array in the teacher's document
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(teacherDoc.id)
+              .update({
+            'classes': FieldValue.arrayUnion([classDocRef.id])
+          });
+        }
+
+        Navigator.of(context).pop(); // Close the dialog after submission
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+          ),
+        );
+      }
     }
   }
 

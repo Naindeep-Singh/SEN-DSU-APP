@@ -7,6 +7,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:json5/json5.dart' as json5;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
 
 class DocumentUpload extends StatefulWidget {
   const DocumentUpload({super.key, required this.username});
@@ -22,7 +23,6 @@ class _DocumentUploadState extends State<DocumentUpload> {
   List<Widget> topics = [];
 
   Future<void> _pickFileAndUpload() async {
-    // Pick a file
     List<Widget> tempTopics = [];
 
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -32,18 +32,7 @@ class _DocumentUploadState extends State<DocumentUpload> {
         isUploading = true;
       });
 
-      // Show the progress indicator dialog
-      if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return buildProgressIndicator();
-          },
-        );
-      }
       try {
-        // Prepare the file
         String filePath = result.files.single.path!;
         String fileName = result.files.single.name;
         File file = File(filePath);
@@ -56,7 +45,6 @@ class _DocumentUploadState extends State<DocumentUpload> {
 
         String geminiResponse = await _sendFileToGemini(processedText);
 
-        // Test if we get correctly formatted string
         var test = json5.json5Decode(geminiResponse);
         log('ITS FORMATTED!');
         snackbarMsg("File Uploaded Successfully!", Colors.teal);
@@ -78,7 +66,7 @@ class _DocumentUploadState extends State<DocumentUpload> {
         for (var doc in docs) {
           var data = doc.data() as Map<String, dynamic>;
           tempTopics.add(buildDocuments(
-              data['documentname'], json5.json5Decode(data['documenttext'])));
+              data['documentname'], json5.json5Decode(data['documenttext']), doc.id));
         }
         setState(() {
           topics.addAll(tempTopics);
@@ -91,9 +79,6 @@ class _DocumentUploadState extends State<DocumentUpload> {
           message = 'File upload failed: $e';
         });
       } finally {
-        if (mounted) {
-          Navigator.pop(context);
-        }
         setState(() {
           isUploading = false;
         });
@@ -106,32 +91,26 @@ class _DocumentUploadState extends State<DocumentUpload> {
   }
 
   String preprocessText(String text) {
-    // Remove any unwanted characters or control characters
     String cleanedText = text
-        .replaceAll(RegExp(r'\s+'),
-            ' ') // Replace multiple whitespace with a single space
-        .replaceAll(RegExp(r'[^\x20-\x7E]'),
-            '') // Remove non-printable ASCII characters
-        .trim(); // Remove leading and trailing whitespace
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .replaceAll(RegExp(r'[^\x20-\x7E]'), '')
+        .trim();
 
-    // Escape JSON special characters
-    cleanedText = cleanedText.replaceAll('"', r'\"'); // Escape double quotes
-    cleanedText = cleanedText.replaceAll('\\', r'\\'); // Escape backslashes
+    cleanedText = cleanedText.replaceAll('"', r'\"');
+    cleanedText = cleanedText.replaceAll('\\', r'\\');
 
     return cleanedText;
   }
 
   Future<String> _sendFileToGemini(String extractedtext) async {
-    // Define the mime type for PDF
     log('Entered send file to gemini');
-    const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc';
-    // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
+    const apiKey = 'YOUR_API_KEY';
     final model = GenerativeModel(
         model: 'gemini-1.5-pro',
         apiKey: apiKey,
         generationConfig:
             GenerationConfig(responseMimeType: "application/json"));
-    // Create the content to send to Gemini
+
     final content = [
       Content.text('''
       {
@@ -321,64 +300,64 @@ class _DocumentUploadState extends State<DocumentUpload> {
     return "${response.text}";
   }
 
-  Widget buildDocuments(String name, dynamic data) {
-    topics = [];
-    return ListTile(
-      leading: const Icon(
-        Icons.batch_prediction,
-        color: Colors.amber,
+  Future<void> _deleteDocument(String docId) async {
+    await FirebaseFirestore.instance.collection('documents').doc(docId).delete();
+    snackbarMsg("Document deleted!", Colors.red);
+    getDocs();
+  }
+
+  Widget buildDocuments(String name, dynamic data, String docId) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
       ),
-      title: Center(
-        child: Text(
-          name,
-          style: const TextStyle(
-            fontSize: 15,
-          ),
+      elevation: 5,
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      child: ListTile(
+        leading: const Icon(
+          Icons.batch_prediction,
+          color: Colors.amber,
         ),
-      ),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Lander(
-              data: data,
+        title: Center(
+          child: Text(
+            name,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        );
-      },
-      shape: const RoundedRectangleBorder(
-        side: BorderSide(color: Colors.black, width: 2),
-        borderRadius: BorderRadius.all(Radius.circular(25)),
-      ),
-      trailing: GestureDetector(
-        child: Icon(
-          Icons.arrow_forward,
-          color: Colors.red.shade600,
         ),
         onTap: () {
-          debugPrint("arrow forward tapped");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Lander(
+                data: data,
+              ),
+            ),
+          );
         },
+        shape: const RoundedRectangleBorder(
+          side: BorderSide(color: Colors.black, width: 2),
+          borderRadius: BorderRadius.all(Radius.circular(25)),
+        ),
+        trailing: GestureDetector(
+          child: Icon(
+            Icons.delete,
+            color: Colors.red.shade600,
+          ),
+          onTap: () => _deleteDocument(docId),
+        ),
       ),
     );
   }
 
-  Widget buildProgressIndicator() {
-    return WillPopScope(
-      onWillPop: () async => false,
-      // Prevent dismissing the dialog by tapping outside
-      child: Dialog(
-        backgroundColor: Colors.black.withOpacity(0.5),
-        child: const Padding(
-          padding: EdgeInsets.all(16),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Text('Uploading...', style: TextStyle(color: Colors.white)),
-            ],
-          ),
-        ),
+  Widget buildLottieProgressIndicator() {
+    return Center(
+      child: Lottie.network(
+        'https://lottie.host/bf54bc22-5ef0-44db-872f-6c859e16384d/OXWwJtv9g5.json',
+        width: 100,
+        height: 100,
       ),
     );
   }
@@ -409,10 +388,10 @@ class _DocumentUploadState extends State<DocumentUpload> {
     for (var doc in docs) {
       var data = doc.data() as Map<String, dynamic>;
       tempTopics.add(buildDocuments(
-          data['documentname'], json5.json5Decode(data['documenttext'])));
+          data['documentname'], json5.json5Decode(data['documenttext']), doc.id));
     }
     setState(() {
-      topics.addAll(tempTopics);
+      topics = tempTopics;
     });
   }
 
@@ -431,26 +410,29 @@ class _DocumentUploadState extends State<DocumentUpload> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Center(child: Text("Document Upload")),
+      body: Stack(
+        children: [
+          ListView.builder(
+            itemCount: topics.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: topics[index],
+              );
+            },
+          ),
+          if (isUploading)
+            buildLottieProgressIndicator(),
+        ],
       ),
-      body: Center(
-        child: ListView.builder(
-          itemCount: topics.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: topics[index],
-            );
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _pickFileAndUpload,
-        tooltip: 'Upload',
-        child: const Icon(Icons.upload_file),
-      ),
+      floatingActionButton: isUploading
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _pickFileAndUpload,
+              tooltip: 'Upload Document',
+              icon: const Icon(Icons.upload_file),
+              label: const Text('Upload'),
+            ),
     );
   }
 }
