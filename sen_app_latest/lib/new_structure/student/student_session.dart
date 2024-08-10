@@ -4,6 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sen_app_latest/new_structure/sen_group/sen_group.dart';
 
+//sesion
 class StudentSession extends StatefulWidget {
   const StudentSession(
       {super.key, required this.username, required this.email});
