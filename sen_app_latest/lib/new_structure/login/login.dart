@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lottie/lottie.dart';
 import 'package:sen_app_latest/new_structure/sen_ui/sen_ui.dart'; // Import SENPage
-import 'package:sen_app_latest/new_structure/student/studentlanding.dart'; // Import StudentLanding
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

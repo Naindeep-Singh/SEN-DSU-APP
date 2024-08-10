@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:json5/json5.dart' as json5;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:sen_app_latest/landing/landingpage.dart';
+import 'package:sen_app_latest/new_structure/shared/topicspage.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:lottie/lottie.dart';
 
@@ -58,6 +58,7 @@ class _DocumentUploadState extends State<DocumentUpload> {
         String geminiResponse = await _sendFileToGemini(processedText);
 
         // Test if we get correctly formatted string
+        // ignore: unused_local_variable
         var test = json5.json5Decode(geminiResponse);
         log('JSON is formatted correctly.');
         snackbarMsg("File Uploaded Successfully!", Colors.teal);
@@ -226,7 +227,8 @@ class _DocumentUploadState extends State<DocumentUpload> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: Icon(Icons.delete_forever, color: Colors.red, size: 28),
+              icon:
+                  const Icon(Icons.delete_forever, color: Colors.red, size: 28),
               onPressed: () => _deleteDocument(docId),
               tooltip: "Delete Document",
             ),
@@ -240,8 +242,9 @@ class _DocumentUploadState extends State<DocumentUpload> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => Lander(
+              builder: (context) => TopicsPage(
                 data: data,
+                title: "Student",
               ),
             ),
           );
@@ -336,7 +339,11 @@ class _DocumentUploadState extends State<DocumentUpload> {
   @override
   void dispose() {
     super.dispose();
-    ScaffoldMessenger.of(context).clearSnackBars();
+    try {
+      ScaffoldMessenger.of(context).clearSnackBars();
+    } catch (e) {
+      debugPrint('$e');
+    }
   }
 
   @override
@@ -363,7 +370,8 @@ class _DocumentUploadState extends State<DocumentUpload> {
                   icon: const Icon(Icons.upload_file),
                   backgroundColor: Colors.teal,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0), // Slightly reduced radius
+                    borderRadius:
+                        BorderRadius.circular(8.0), // Slightly reduced radius
                   ),
                 ),
               ),

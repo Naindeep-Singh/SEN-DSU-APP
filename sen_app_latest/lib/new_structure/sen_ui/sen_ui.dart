@@ -3,39 +3,50 @@ import 'package:lottie/lottie.dart';
 import 'package:sen_app_latest/new_structure/document_upload/documentupload.dart';
 import 'package:sen_app_latest/new_structure/community/community.dart';
 import 'package:sen_app_latest/new_structure/profile/profile.dart';
-import 'package:sen_app_latest/new_structure/student/studentlanding.dart'; // Ensure correct import path
-import 'package:sen_app_latest/new_structure/student/student_session.dart'; // Import StudentSession
-import 'package:sen_app_latest/new_structure/teacher/teacherlanding.dart'; // Import TeacherLanding
-import 'package:sen_app_latest/new_structure/teacher/session/session.dart'; // Import Teacher's Session page
+import 'package:sen_app_latest/new_structure/student/studentclasses.dart';
+import 'package:sen_app_latest/new_structure/student/student_session.dart'; 
+import 'package:sen_app_latest/new_structure/teacher/teacherlanding.dart'; 
+import 'package:sen_app_latest/new_structure/teacher/session/session.dart'; 
 
 class SENPage extends StatefulWidget {
   final String username;
   final String userType;
 
-  const SENPage({Key? key, required this.username, required this.userType})
-      : super(key: key);
+  const SENPage({super.key, required this.username, required this.userType});
 
   @override
-  _SENPageState createState() => _SENPageState();
+  SENPageState createState() => SENPageState();
 }
 
-class _SENPageState extends State<SENPage> {
-  int _selectedIndex = 0;  // Default index to the first tab
+class SENPageState extends State<SENPage> {
+  int _selectedIndex = 0; // Default index to the first tab
 
   // List of widgets corresponding to each bottom navigation item
   List<Widget> get _widgetOptions {
     if (widget.userType == 'teacher') {
       return [
-        TeacherLanding(username: widget.username), // Teacher's Landing Page (Groups)
-        SessionLanding(username: widget.username, email: '',),  // Teacher's Session page (Exam)
+        TeacherLanding(
+            username: widget.username), // Teacher's Landing Page (Groups)
+        SessionLanding(
+          username: widget.username,
+          email: '',
+        ), // Teacher's Session page (Exam)
         CommunityPage(username: widget.username),
         ProfilePage(userType: widget.userType, username: widget.username),
       ];
     } else {
       return [
-        StudentLanding(username: widget.username, email: '', type: '',), // Student's Landing Page (Groups)
-        StudentSession(username: widget.username, email: '',), // New Page for Student Session
-        DocumentUpload(username: widget.username),  // Viva - Ai linked to DocumentUpload (Exam)
+        StudentClasses(
+          username: widget.username,
+          type: widget.userType,
+        ), // Student's Landing Page (Groups)
+        StudentSession(
+          username: widget.username,
+          email: '',
+        ), // New Page for Student Session
+        DocumentUpload(
+            username:
+                widget.username), // Viva - Ai linked to DocumentUpload (Exam)
         CommunityPage(username: widget.username),
         ProfilePage(userType: widget.userType, username: widget.username),
       ];

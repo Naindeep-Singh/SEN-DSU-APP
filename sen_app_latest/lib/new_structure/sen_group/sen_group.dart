@@ -10,23 +10,30 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 class SenGroupPage extends StatefulWidget {
   final String? sessionTitle;
   final String? sessionCode;
+  final String username;
 
-  const SenGroupPage({Key? key, required this.sessionTitle, required this.sessionCode}) : super(key: key);
+  const SenGroupPage(
+      {super.key,
+      required this.sessionTitle,
+      required this.sessionCode,
+      required this.username});
 
   @override
-  _SenGroupPageState createState() => _SenGroupPageState();
+  SenGroupPageState createState() => SenGroupPageState();
 }
 
-class _SenGroupPageState extends State<SenGroupPage> {
+class SenGroupPageState extends State<SenGroupPage> {
   final List<Widget> contentList = [];
   final TextEditingController _textController = TextEditingController();
-  final TextEditingController _additionalInfoController = TextEditingController();
+  final TextEditingController _additionalInfoController =
+      TextEditingController();
   bool isDarkTheme = true;
   bool isLoading = false;
   String? summaryResponse;
   bool _isBottomSheetVisible = false;
 
-  Offset floatingButtonOffset = Offset(20, 100); // Initialize with default position
+  Offset floatingButtonOffset =
+      const Offset(20, 100); // Initialize with default position
 
   static const apiKey = 'YOUR_API_KEY_HERE';
   final model = 'gemini-1.5-pro';
@@ -37,35 +44,73 @@ class _SenGroupPageState extends State<SenGroupPage> {
     _loadSessionFromFirebase();
   }
 
-  Future<void> _loadSessionFromFirebase() async {
-    final snapshot = await FirebaseFirestore.instance
+  Future<void> _saveTextToFirebase(String text, String username) async {
+    final sessionRef = FirebaseFirestore.instance
         .collection('sessions')
         .doc(widget.sessionCode)
-        .get();
+        .collection('textEntries');
 
-    if (snapshot.exists) {
-      final data = snapshot.data()!;
-      if (data.containsKey('textContent')) {
-        setState(() {
-          contentList.add(Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: Text(data['textContent'], style: TextStyle(color: isDarkTheme ? Colors.white : Colors.black)),
-          ));
-        });
+    await sessionRef.add({
+      'text': text,
+      'timestamp': FieldValue.serverTimestamp(),
+      'username': username,
+    });
+
+    // Display the save notification only in SenGroupPage
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content:
+          const Text('Text saved successfully!', textAlign: TextAlign.center),
+      backgroundColor: Colors.teal,
+      duration: const Duration(seconds: 2),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      margin: const EdgeInsets.only(top: 0.0),
+    ));
+  }
+
+  Future<void> _loadSessionFromFirebase() async {
+    final sessionRef = FirebaseFirestore.instance
+        .collection('sessions')
+        .doc(widget.sessionCode)
+        .collection('textEntries');
+
+    final snapshot = await sessionRef.orderBy('timestamp').get();
+
+    setState(() {
+      contentList.clear();
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final text = data['text'] ?? '';
+        final username = data['username'] ?? 'Anonymous';
+        final timestamp = data['timestamp']?.toDate() ?? DateTime.now();
+
+        contentList.add(Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          child: Text(
+            '$text\n- $username, ${timestamp.toLocal()}',
+            style: TextStyle(color: isDarkTheme ? Colors.white : Colors.black),
+          ),
+        ));
       }
-    }
+    });
   }
 
   Future<void> _saveSessionToFirebase() async {
     final textContent = _textController.text;
 
-    await FirebaseFirestore.instance.collection('sessions').doc(widget.sessionCode).set({
+    await FirebaseFirestore.instance
+        .collection('sessions')
+        .doc(widget.sessionCode)
+        .set({
       'textContent': textContent,
     });
 
     // Display the save notification only in SenGroupPage
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Session saved successfully!', textAlign: TextAlign.center),
+      content: const Text('Session saved successfully!',
+          textAlign: TextAlign.center),
       backgroundColor: Colors.teal,
       duration: const Duration(seconds: 2),
       behavior: SnackBarBehavior.floating,
@@ -103,7 +148,7 @@ class _SenGroupPageState extends State<SenGroupPage> {
       Widget imageWidget = Column(
         children: [
           Image.file(imageFile, width: 150, height: 150, fit: BoxFit.cover),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
         ],
       );
       if (insertIndex != null) {
@@ -120,9 +165,14 @@ class _SenGroupPageState extends State<SenGroupPage> {
       Widget pdfWidget = Column(
         children: [
           ListTile(
-            leading: Icon(Icons.picture_as_pdf, color: isDarkTheme ? Colors.teal : Colors.black),
-            title: Text(fileName, style: TextStyle(color: isDarkTheme ? Colors.white : Colors.black)),
-            subtitle: Text('PDF Document', style: TextStyle(color: isDarkTheme ? Colors.grey : Colors.black54)),
+            leading: Icon(Icons.picture_as_pdf,
+                color: isDarkTheme ? Colors.teal : Colors.black),
+            title: Text(fileName,
+                style: TextStyle(
+                    color: isDarkTheme ? Colors.white : Colors.black)),
+            subtitle: Text('PDF Document',
+                style: TextStyle(
+                    color: isDarkTheme ? Colors.grey : Colors.black54)),
             onTap: () {
               Navigator.push(
                 context,
@@ -132,7 +182,7 @@ class _SenGroupPageState extends State<SenGroupPage> {
               );
             },
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
         ],
       );
       if (insertIndex != null) {
@@ -149,14 +199,19 @@ class _SenGroupPageState extends State<SenGroupPage> {
       Widget fileWidget = Column(
         children: [
           ListTile(
-            leading: Icon(Icons.insert_drive_file, color: isDarkTheme ? Colors.teal : Colors.black),
-            title: Text(fileName, style: TextStyle(color: isDarkTheme ? Colors.white : Colors.black)),
-            subtitle: Text('File', style: TextStyle(color: isDarkTheme ? Colors.grey : Colors.black54)),
+            leading: Icon(Icons.insert_drive_file,
+                color: isDarkTheme ? Colors.teal : Colors.black),
+            title: Text(fileName,
+                style: TextStyle(
+                    color: isDarkTheme ? Colors.white : Colors.black)),
+            subtitle: Text('File',
+                style: TextStyle(
+                    color: isDarkTheme ? Colors.grey : Colors.black54)),
             onTap: () {
               // Handle file open
             },
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
         ],
       );
       if (insertIndex != null) {
@@ -195,7 +250,8 @@ class _SenGroupPageState extends State<SenGroupPage> {
         for (var child in widget.children) {
           if (child is Image) {
             final File imageFile = (child.image as FileImage).file;
-            final String base64Image = base64Encode(imageFile.readAsBytesSync());
+            final String base64Image =
+                base64Encode(imageFile.readAsBytesSync());
             sessionImages.add(base64Image);
           }
         }
@@ -208,7 +264,7 @@ class _SenGroupPageState extends State<SenGroupPage> {
     _showSummaryBar(content, sessionImages);
 
     try {
-      await _saveSessionToFirebase();  // Save session before summarizing
+      await _saveSessionToFirebase(); // Save session before summarizing
       summaryResponse = await _getSummaryFromGemini(content, sessionImages);
       print(summaryResponse);
     } catch (e) {
@@ -222,7 +278,8 @@ class _SenGroupPageState extends State<SenGroupPage> {
     }
   }
 
-  Future<String> _getSummaryFromGemini(String content, List<String> images) async {
+  Future<String> _getSummaryFromGemini(
+      String content, List<String> images) async {
     final url = Uri.parse('https://api.your-service.com/generate-summary');
     final response = await http.post(
       url,
@@ -253,7 +310,7 @@ class _SenGroupPageState extends State<SenGroupPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Sending content for summarization...'),
+          const Text('Sending content for summarization...'),
           Text('Text: $content'),
           Text('Images: ${images.length} image(s)'),
         ],
@@ -268,10 +325,13 @@ class _SenGroupPageState extends State<SenGroupPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: isDarkTheme ? Colors.grey[850] : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
           title: Row(
             children: [
-              Text('Session Summary', style: TextStyle(color: isDarkTheme ? Colors.teal : Colors.black)),
+              Text('Session Summary',
+                  style: TextStyle(
+                      color: isDarkTheme ? Colors.teal : Colors.black)),
               Lottie.network(
                 'https://lottie.host/bf54bc22-5ef0-44db-872f-6c859e16384d/OXWwJtv9g5.json',
                 height: 40,
@@ -280,14 +340,17 @@ class _SenGroupPageState extends State<SenGroupPage> {
             ],
           ),
           content: SingleChildScrollView(
-            child: Text(summaryResponse ?? '', style: TextStyle(color: isDarkTheme ? Colors.white : Colors.black)),
+            child: Text(summaryResponse ?? '',
+                style: TextStyle(
+                    color: isDarkTheme ? Colors.white : Colors.black)),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Close', style: TextStyle(color: Colors.teal)),
+              child: const Text('Close',
+                  style: const TextStyle(color: Colors.teal)),
             ),
           ],
         );
@@ -305,17 +368,26 @@ class _SenGroupPageState extends State<SenGroupPage> {
       ),
       textTheme: TextTheme(
         bodyMedium: TextStyle(color: isDarkTheme ? Colors.white : Colors.black),
-        titleMedium: TextStyle(color: isDarkTheme ? Colors.white : Colors.black),
+        titleMedium:
+            TextStyle(color: isDarkTheme ? Colors.white : Colors.black),
       ),
     );
   }
 
+  String globalText = '';
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: _buildThemeData(),
       home: Scaffold(
         appBar: AppBar(
+          leading: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Icon(Icons.arrow_back)),
           title: Text(widget.sessionTitle ?? 'Session Group'),
           actions: [
             IconButton(
@@ -338,22 +410,34 @@ class _SenGroupPageState extends State<SenGroupPage> {
                           return TextField(
                             controller: _textController,
                             maxLines: null,
-                            style: TextStyle(color: isDarkTheme ? Colors.white : Colors.black),
+                            style: TextStyle(
+                                color:
+                                    isDarkTheme ? Colors.white : Colors.black),
                             decoration: InputDecoration(
-                              hintText: "Write something, or press '+' for commands...",
-                              hintStyle: TextStyle(color: isDarkTheme ? Colors.grey : Colors.black54),
+                              hintText:
+                                  "Write something, or press '+' for commands...",
+                              hintStyle: TextStyle(
+                                  color: isDarkTheme
+                                      ? Colors.grey
+                                      : Colors.black54),
                               border: InputBorder.none,
                             ),
                             onSubmitted: (text) {
                               setState(() {
+                                globalText = text;
                                 contentList.add(
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                                    child: Text(text, style: TextStyle(color: isDarkTheme ? Colors.white : Colors.black)),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10.0),
+                                    child: Text(text,
+                                        style: TextStyle(
+                                            color: isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black)),
                                   ),
                                 );
                                 _textController.clear();
-                                _saveSessionToFirebase();
+                                _saveTextToFirebase(text, widget.username);
                               });
                             },
                           );
@@ -369,15 +453,21 @@ class _SenGroupPageState extends State<SenGroupPage> {
                     ),
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // Place buttons on opposite sides
+                    mainAxisAlignment: MainAxisAlignment
+                        .spaceBetween, // Place buttons on opposite sides
                     children: [
                       IconButton(
-                        icon: Icon(Icons.add, color: isDarkTheme ? Colors.teal : Colors.black),
+                        icon: Icon(Icons.add,
+                            color: isDarkTheme ? Colors.teal : Colors.black),
                         onPressed: () => _uploadFile(),
                       ),
                       ElevatedButton(
-                        onPressed: _saveSessionToFirebase,
-                        child: Text('Save'),
+                        onPressed: () async {
+                          await _saveTextToFirebase(
+                              globalText, widget.username);
+                          await _loadSessionFromFirebase();
+                        },
+                        child: const Text('Save'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.teal,
                         ),
@@ -400,32 +490,40 @@ class _SenGroupPageState extends State<SenGroupPage> {
                     alignment: Alignment.bottomCenter,
                     child: Container(
                       color: isDarkTheme ? Colors.grey[900] : Colors.white,
-                      padding: EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           TextField(
                             controller: _additionalInfoController,
-                            style: TextStyle(color: isDarkTheme ? Colors.white : Colors.black),
+                            style: TextStyle(
+                                color:
+                                    isDarkTheme ? Colors.white : Colors.black),
                             decoration: InputDecoration(
-                              hintText: "Add additional information before generating the summary...",
-                              hintStyle: TextStyle(color: isDarkTheme ? Colors.grey : Colors.black54),
+                              hintText:
+                                  "Add additional information before generating the summary...",
+                              hintStyle: TextStyle(
+                                  color: isDarkTheme
+                                      ? Colors.grey
+                                      : Colors.black54),
                               border: InputBorder.none,
                             ),
                           ),
-                          SizedBox(height: 25),
+                          const SizedBox(height: 25),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               ElevatedButton(
                                 onPressed: _summarizeSession,
-                                child: Text('Generate Summary'),
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+                                child: const Text('Generate Summary'),
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.teal),
                               ),
                               ElevatedButton(
                                 onPressed: _toggleBottomSheet,
-                                child: Text('Cancel'),
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                child: const Text('Cancel'),
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red),
                               ),
                             ],
                           ),
@@ -433,7 +531,7 @@ class _SenGroupPageState extends State<SenGroupPage> {
                       ),
                     ),
                   )
-                : SizedBox.shrink(),
+                : const SizedBox.shrink(),
           ],
         ),
         floatingActionButton: Stack(
@@ -453,9 +551,11 @@ class _SenGroupPageState extends State<SenGroupPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color.fromARGB(255, 199, 205, 204).withOpacity(0.8), // Slightly transparent background
+                      color: const Color.fromARGB(255, 199, 205, 204)
+                          .withOpacity(0.8), // Slightly transparent background
                     ),
-                    padding: EdgeInsets.all(8), // Padding inside the round button
+                    padding: const EdgeInsets.all(
+                        8), // Padding inside the round button
                     child: Lottie.network(
                       'https://lottie.host/bf54bc22-5ef0-44db-872f-6c859e16384d/OXWwJtv9g5.json',
                       height: 40,
@@ -481,7 +581,12 @@ class PDFViewerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('PDF Viewer'),
+        leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(Icons.arrow_back)),
+        title: const Text('PDF Viewer'),
       ),
       body: SfPdfViewer.file(File(filePath)),
     );

@@ -100,12 +100,13 @@ class _SessionLandingState extends State<SessionLanding> {
           builder: (context) => SenGroupPage(
             sessionTitle: sessionDoc['sessionTitle'],
             sessionCode: sessionDoc['code'],
+            username: widget.username,
           ),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Session not found'),
           backgroundColor: Colors.redAccent,
         ),
@@ -137,14 +138,14 @@ class _SessionLandingState extends State<SessionLanding> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Session deleted successfully'),
             backgroundColor: Colors.green,
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text(''), //comment to shoe on the serch bar
             backgroundColor: Colors.redAccent,
           ),
@@ -180,7 +181,7 @@ class _SessionLandingState extends State<SessionLanding> {
                 ),
                 decoration: BoxDecoration(
                   color: Colors.grey[850],
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   ),
@@ -188,7 +189,7 @@ class _SessionLandingState extends State<SessionLanding> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
+                    const Text(
                       'New Session',
                       style: TextStyle(
                         color: Colors.teal,
@@ -196,12 +197,12 @@ class _SessionLandingState extends State<SessionLanding> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     TextField(
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         labelText: 'Title',
-                        labelStyle: TextStyle(color: Colors.grey),
+                        labelStyle: const TextStyle(color: Colors.grey),
                         filled: true,
                         fillColor: Colors.grey[800],
                         border: OutlineInputBorder(
@@ -209,7 +210,7 @@ class _SessionLandingState extends State<SessionLanding> {
                           borderSide: BorderSide.none,
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.teal),
+                          borderSide: const BorderSide(color: Colors.teal),
                           borderRadius: BorderRadius.circular(15.0),
                         ),
                       ),
@@ -219,7 +220,7 @@ class _SessionLandingState extends State<SessionLanding> {
                         });
                       },
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(
@@ -245,7 +246,7 @@ class _SessionLandingState extends State<SessionLanding> {
                             borderRadius: BorderRadius.circular(30.0),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Next',
                           style: TextStyle(color: Colors.black),
                         ),
@@ -268,17 +269,17 @@ class _SessionLandingState extends State<SessionLanding> {
         return AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-          title: Text('Join Session', style: TextStyle(color: Colors.teal)),
+          title: const Text('Join Session', style: TextStyle(color: Colors.teal)),
           content: TextField(
             controller: _joinController,
             decoration: InputDecoration(
               labelText: 'Enter Session Code',
-              labelStyle: TextStyle(color: Colors.grey),
+              labelStyle: const TextStyle(color: Colors.grey),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15.0),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.teal),
+                borderSide: const BorderSide(color: Colors.teal),
                 borderRadius: BorderRadius.circular(15.0),
               ),
             ),
@@ -288,14 +289,14 @@ class _SessionLandingState extends State<SessionLanding> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel', style: TextStyle(color: Colors.grey)),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 joinSession(_joinController.text, widget.username);
               },
-              child: Text('Join', style: TextStyle(color: Colors.teal)),
+              child: const Text('Join', style: TextStyle(color: Colors.teal)),
             ),
           ],
         );
@@ -312,6 +313,7 @@ class _SessionLandingState extends State<SessionLanding> {
             builder: (context) => SenGroupPage(
               sessionTitle: session['title'],
               sessionCode: session['code'],
+              username: widget.username,
             ),
           ),
         );
@@ -332,7 +334,7 @@ class _SessionLandingState extends State<SessionLanding> {
               color: Colors.black.withOpacity(0.3),
               spreadRadius: 3,
               blurRadius: 5,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -345,22 +347,22 @@ class _SessionLandingState extends State<SessionLanding> {
                   if (session['title'] != null && session['title']!.isNotEmpty)
                     Text(
                       session['title']!,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.teal,
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold),
                     ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   if (session['code'] != null)
                     Text(
                       'Sen Code: ${session['code']}',
-                      style: TextStyle(color: Colors.teal, fontSize: 16.0),
+                      style: const TextStyle(color: Colors.teal, fontSize: 16.0),
                     ),
                 ],
               ),
             ),
             IconButton(
-              icon: Icon(Icons.delete, color: Colors.redAccent),
+              icon: const Icon(Icons.delete, color: Colors.redAccent),
               onPressed: () {
                 _deleteSession(index);
               },
@@ -391,11 +393,11 @@ class _SessionLandingState extends State<SessionLanding> {
                 padding: const EdgeInsets.all(16.0),
                 child: TextField(
                   controller: _searchController,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search, color: Colors.white),
+                    prefixIcon: const Icon(Icons.search, color: Colors.white),
                     hintText: 'Search sessions...',
-                    hintStyle: TextStyle(color: Colors.grey),
+                    hintStyle: const TextStyle(color: Colors.grey),
                     filled: true,
                     fillColor: Colors.black.withOpacity(0.5),
                     border: OutlineInputBorder(
@@ -413,7 +415,7 @@ class _SessionLandingState extends State<SessionLanding> {
                           return _buildBanner(filteredSessions[index], index);
                         },
                       )
-                    : Center(
+                    : const Center(
                         child: Text(
                           '', //search bar notfiaction if you want to add
                           style: TextStyle(color: Colors.white, fontSize: 18),
@@ -427,7 +429,7 @@ class _SessionLandingState extends State<SessionLanding> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [Colors.teal, Colors.greenAccent],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -438,7 +440,7 @@ class _SessionLandingState extends State<SessionLanding> {
                             color: Colors.black.withOpacity(0.3),
                             spreadRadius: 3,
                             blurRadius: 5,
-                            offset: Offset(0, 2),
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
@@ -450,10 +452,10 @@ class _SessionLandingState extends State<SessionLanding> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               vertical: 15.0, horizontal: 30.0),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Create',
                           style: TextStyle(
                               color: Colors.black, fontWeight: FontWeight.bold),
@@ -462,7 +464,7 @@ class _SessionLandingState extends State<SessionLanding> {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [Colors.teal, Colors.greenAccent],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -473,7 +475,7 @@ class _SessionLandingState extends State<SessionLanding> {
                             color: Colors.black.withOpacity(0.3),
                             spreadRadius: 3,
                             blurRadius: 5,
-                            offset: Offset(0, 2),
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
@@ -485,10 +487,10 @@ class _SessionLandingState extends State<SessionLanding> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               vertical: 15.0, horizontal: 30.0),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Join',
                           style: TextStyle(
                               color: Colors.black, fontWeight: FontWeight.bold),

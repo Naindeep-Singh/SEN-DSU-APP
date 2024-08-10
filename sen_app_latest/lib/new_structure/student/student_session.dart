@@ -5,15 +5,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sen_app_latest/new_structure/sen_group/sen_group.dart';
 
 class StudentSession extends StatefulWidget {
-  const StudentSession({super.key, required this.username, required this.email});
+  const StudentSession(
+      {super.key, required this.username, required this.email});
   final String username;
   final String email;
 
   @override
-  _StudentSessionState createState() => _StudentSessionState();
+  StudentSessionState createState() => StudentSessionState();
 }
 
-class _StudentSessionState extends State<StudentSession> {
+class StudentSessionState extends State<StudentSession> {
   final List<Map<String, String?>> sessions = [];
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _joinController = TextEditingController();
@@ -36,10 +37,9 @@ class _StudentSessionState extends State<StudentSession> {
   void _filterSessions() {
     setState(() {
       filteredSessions = sessions
-          .where((session) =>
-              session['title']!
-                  .toLowerCase()
-                  .contains(_searchController.text.toLowerCase()))
+          .where((session) => session['title']!
+              .toLowerCase()
+              .contains(_searchController.text.toLowerCase()))
           .toList();
     });
   }
@@ -63,7 +63,8 @@ class _StudentSessionState extends State<StudentSession> {
     });
   }
 
-  Future<void> saveSession(String title, String code, String username, String email) async {
+  Future<void> saveSession(
+      String title, String code, String username, String email) async {
     await FirebaseFirestore.instance.collection('Sessions').add({
       'sessionTitle': title,
       'code': code,
@@ -93,23 +94,28 @@ class _StudentSessionState extends State<StudentSession> {
         });
       }
 
-      // Navigate to the session page
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SenGroupPage(
-            sessionTitle: sessionDoc['sessionTitle'],
-            sessionCode: sessionDoc['code'],
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SenGroupPage(
+              sessionTitle: sessionDoc['sessionTitle'],
+              sessionCode: sessionDoc['code'],
+              username: widget.username,
+            ),
           ),
-        ),
-      );
+        );
+      }
+      // Navigate to the session page
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Session not found'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Session not found'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     }
   }
 
@@ -136,27 +142,33 @@ class _StudentSessionState extends State<StudentSession> {
           filteredSessions = sessions; // Update filtered list
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Session deleted successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Session deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(''), //comment to shoe on the serch bar
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(''), //comment to shoe on the serch bar
+            content: Text('Failed to delete session: $e'),
             backgroundColor: Colors.redAccent,
           ),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to delete session: $e'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
     }
   }
 
@@ -180,7 +192,7 @@ class _StudentSessionState extends State<StudentSession> {
                 ),
                 decoration: BoxDecoration(
                   color: Colors.grey[850],
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   ),
@@ -188,7 +200,7 @@ class _StudentSessionState extends State<StudentSession> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
+                    const Text(
                       'New Session',
                       style: TextStyle(
                         color: Colors.teal,
@@ -196,12 +208,12 @@ class _StudentSessionState extends State<StudentSession> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     TextField(
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         labelText: 'Title',
-                        labelStyle: TextStyle(color: Colors.grey),
+                        labelStyle: const TextStyle(color: Colors.grey),
                         filled: true,
                         fillColor: Colors.grey[800],
                         border: OutlineInputBorder(
@@ -209,7 +221,7 @@ class _StudentSessionState extends State<StudentSession> {
                           borderSide: BorderSide.none,
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.teal),
+                          borderSide: const BorderSide(color: Colors.teal),
                           borderRadius: BorderRadius.circular(15.0),
                         ),
                       ),
@@ -219,15 +231,17 @@ class _StudentSessionState extends State<StudentSession> {
                         });
                       },
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(
                         onPressed: () {
                           final random = Random();
-                          String generatedCode = (random.nextInt(9000) + 1000).toString(); // Generate a 4-digit code
+                          String generatedCode = (random.nextInt(9000) + 1000)
+                              .toString(); // Generate a 4-digit code
 
-                          saveSession(title!, generatedCode, widget.username, widget.email);
+                          saveSession(title!, generatedCode, widget.username,
+                              widget.email);
 
                           setState(() {
                             sessions.add({
@@ -245,7 +259,7 @@ class _StudentSessionState extends State<StudentSession> {
                             borderRadius: BorderRadius.circular(30.0),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Next',
                           style: TextStyle(color: Colors.black),
                         ),
@@ -268,17 +282,18 @@ class _StudentSessionState extends State<StudentSession> {
         return AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-          title: Text('Join Session', style: TextStyle(color: Colors.teal)),
+          title:
+              const Text('Join Session', style: TextStyle(color: Colors.teal)),
           content: TextField(
             controller: _joinController,
             decoration: InputDecoration(
               labelText: 'Enter Session Code',
-              labelStyle: TextStyle(color: Colors.grey),
+              labelStyle: const TextStyle(color: Colors.grey),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15.0),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.teal),
+                borderSide: const BorderSide(color: Colors.teal),
                 borderRadius: BorderRadius.circular(15.0),
               ),
             ),
@@ -288,14 +303,14 @@ class _StudentSessionState extends State<StudentSession> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel', style: TextStyle(color: Colors.grey)),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 joinSession(_joinController.text, widget.username);
               },
-              child: Text('Join', style: TextStyle(color: Colors.teal)),
+              child: const Text('Join', style: TextStyle(color: Colors.teal)),
             ),
           ],
         );
@@ -312,6 +327,7 @@ class _StudentSessionState extends State<StudentSession> {
             builder: (context) => SenGroupPage(
               sessionTitle: session['title'],
               sessionCode: session['code'],
+              username: widget.username,
             ),
           ),
         );
@@ -332,7 +348,7 @@ class _StudentSessionState extends State<StudentSession> {
               color: Colors.black.withOpacity(0.3),
               spreadRadius: 3,
               blurRadius: 5,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -345,22 +361,23 @@ class _StudentSessionState extends State<StudentSession> {
                   if (session['title'] != null && session['title']!.isNotEmpty)
                     Text(
                       session['title']!,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.teal,
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold),
                     ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   if (session['code'] != null)
                     Text(
                       'Sen Code: ${session['code']}',
-                      style: TextStyle(color: Colors.teal, fontSize: 16.0),
+                      style:
+                          const TextStyle(color: Colors.teal, fontSize: 16.0),
                     ),
                 ],
               ),
             ),
             IconButton(
-              icon: Icon(Icons.delete, color: Colors.redAccent),
+              icon: const Icon(Icons.delete, color: Colors.redAccent),
               onPressed: () {
                 _deleteSession(index);
               },
@@ -391,11 +408,11 @@ class _StudentSessionState extends State<StudentSession> {
                 padding: const EdgeInsets.all(16.0),
                 child: TextField(
                   controller: _searchController,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search, color: Colors.white),
+                    prefixIcon: const Icon(Icons.search, color: Colors.white),
                     hintText: 'Search sessions...',
-                    hintStyle: TextStyle(color: Colors.grey),
+                    hintStyle: const TextStyle(color: Colors.grey),
                     filled: true,
                     fillColor: Colors.black.withOpacity(0.5),
                     border: OutlineInputBorder(
@@ -413,7 +430,7 @@ class _StudentSessionState extends State<StudentSession> {
                           return _buildBanner(filteredSessions[index], index);
                         },
                       )
-                    : Center(
+                    : const Center(
                         child: Text(
                           '', //search bar notification if you want to add
                           style: TextStyle(color: Colors.white, fontSize: 18),
@@ -427,7 +444,7 @@ class _StudentSessionState extends State<StudentSession> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [Colors.teal, Colors.greenAccent],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -438,7 +455,7 @@ class _StudentSessionState extends State<StudentSession> {
                             color: Colors.black.withOpacity(0.3),
                             spreadRadius: 3,
                             blurRadius: 5,
-                            offset: Offset(0, 2),
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
@@ -450,10 +467,10 @@ class _StudentSessionState extends State<StudentSession> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               vertical: 15.0, horizontal: 30.0),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Create',
                           style: TextStyle(
                               color: Colors.black, fontWeight: FontWeight.bold),
@@ -462,7 +479,7 @@ class _StudentSessionState extends State<StudentSession> {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [Colors.teal, Colors.greenAccent],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -473,7 +490,7 @@ class _StudentSessionState extends State<StudentSession> {
                             color: Colors.black.withOpacity(0.3),
                             spreadRadius: 3,
                             blurRadius: 5,
-                            offset: Offset(0, 2),
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
@@ -485,10 +502,10 @@ class _StudentSessionState extends State<StudentSession> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               vertical: 15.0, horizontal: 30.0),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Join',
                           style: TextStyle(
                               color: Colors.black, fontWeight: FontWeight.bold),

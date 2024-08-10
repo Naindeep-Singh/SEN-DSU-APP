@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:sen_app_latest/new_structure/shared/resultspage.dart';
 
-class Teacherqp extends StatefulWidget {
-  const Teacherqp(
+class QuestionsPage extends StatefulWidget {
+  const QuestionsPage(
       {super.key, required this.name, required this.data, required this.ans});
   final String name;
   final Map data;
   final bool ans;
   @override
-  State<Teacherqp> createState() => _TeacherqpState();
+  State<QuestionsPage> createState() => _QuestionsPageState();
 }
 
-class _TeacherqpState extends State<Teacherqp> {
+class _QuestionsPageState extends State<QuestionsPage> {
   int questionCount = 0;
   int currentQuestion = 1;
   bool lastQuestion = false;
@@ -25,8 +26,6 @@ class _TeacherqpState extends State<Teacherqp> {
   @override
   void initState() {
     super.initState();
-    debugPrint("\x1B[34m ${widget.data}");
-
     widget.data.forEach((key, value) {
       questionCount++;
     });
@@ -49,6 +48,20 @@ class _TeacherqpState extends State<Teacherqp> {
       debugPrint("$e");
       return correctAnswers;
     }
+  }
+
+  void navigateToResultsPage() {
+    int correctAnswers = calcCorrect();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultsPage(
+          data: widget.data,
+          answered: answered,
+          correctAnswers: correctAnswers,
+        ),
+      ),
+    );
   }
 
   Widget ansornot() {
@@ -334,7 +347,7 @@ class _TeacherqpState extends State<Teacherqp> {
                             }
                           });
                         } else if (lastQuestion && !widget.ans) {
-                          Navigator.pop(context, calcCorrect());
+                          navigateToResultsPage();
                         }
                       } else {
                         setState(() {
