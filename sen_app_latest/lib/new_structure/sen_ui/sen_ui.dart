@@ -4,6 +4,7 @@ import 'package:sen_app_latest/new_structure/document_upload/documentupload.dart
 import 'package:sen_app_latest/new_structure/community/community.dart';
 import 'package:sen_app_latest/new_structure/profile/profile.dart';
 import 'package:sen_app_latest/new_structure/student/studentlanding.dart'; // Ensure correct import path
+import 'package:sen_app_latest/new_structure/student/student_session.dart'; // Import StudentSession
 import 'package:sen_app_latest/new_structure/teacher/teacherlanding.dart'; // Import TeacherLanding
 import 'package:sen_app_latest/new_structure/teacher/session/session.dart'; // Import Teacher's Session page
 
@@ -32,7 +33,8 @@ class _SENPageState extends State<SENPage> {
       ];
     } else {
       return [
-        StudentLanding(username: widget.username, email: ''), // Student's Landing Page (Groups)
+        StudentLanding(username: widget.username, email: '', type: '',), // Student's Landing Page (Groups)
+        StudentSession(username: widget.username, email: '',), // New Page for Student Session
         DocumentUpload(username: widget.username),  // Viva - Ai linked to DocumentUpload (Exam)
         CommunityPage(username: widget.username),
         ProfilePage(userType: widget.userType, username: widget.username),
@@ -66,6 +68,10 @@ class _SENPageState extends State<SENPage> {
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Groups', // Students see "Groups" here
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.event),
+          label: 'Session', // New button for Student Session
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.description),

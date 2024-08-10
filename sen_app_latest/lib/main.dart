@@ -19,17 +19,15 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Sen App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      // home: const MyHomePage(title: 'Topics'),
       home: const SplashScreen(),
     );
   }
@@ -39,6 +37,7 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title, required this.data});
   final String title;
   final Map data;
+
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
@@ -50,91 +49,82 @@ class _MyHomePageState extends State<MyHomePage> {
     final Uri url = Uri.parse('http://192.168.0.103:5000/get_document');
 
     try {
-      // Send the GET request
       final response = await http.get(url).timeout(const Duration(seconds: 24));
 
-      // Check for a successful response
       if (response.statusCode == 200) {
-        debugPrint('1');
         final data = jsonDecode(response.body);
-        debugPrint(response.body);
         for (var name in data['names']) {
-          debugPrint('10');
           temptopics.add(buildTopics(name, data[name]));
         }
-        debugPrint('3');
       } else {
-        // Handle non-successful response
         debugPrint('Request failed with status: ${response.statusCode}');
       }
       setState(() {
         topics.addAll(temptopics);
       });
     } catch (e) {
-      // Handle any errors that occur
       debugPrint('Error occurred: $e');
     }
   }
 
   Widget buildTopics(String name, Map data) {
-    return ListTile(
-      // key: Key(name),
-      leading: const Icon(
-        Icons.batch_prediction,
-        color: Colors.amber,
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: BorderSide(color: Colors.grey.shade400, width: 1),
       ),
-      title: Center(
-        child: Text(
-          name,
-          style: const TextStyle(
-            fontSize: 15,
+      elevation: 2,
+      margin: EdgeInsets.symmetric(vertical: 6), // Reduced margin for smaller appearance
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12), // Smaller padding
+        leading: const Icon(
+          Icons.batch_prediction,
+          color: Colors.deepPurple,
+        ),
+        title: Center(
+          child: Text(
+            name,
+            style: const TextStyle(
+              fontSize: 15, // Slightly smaller font size
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
           ),
         ),
-      ),
-      onTap: () {
-        debugPrint("$name is the topic");
-        if (ans) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FlipCardPage(
-                data: data,
+        onTap: () {
+          if (ans) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FlipCardPage(
+                  data: data,
+                ),
               ),
-            ),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => QuestionsPage(
-                data: data,
-                name: name,
-                ans: ans,
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => QuestionsPage(
+                  data: data,
+                  name: name,
+                  ans: ans,
+                ),
               ),
-            ),
-          );
-        }
-      },
-      shape: const RoundedRectangleBorder(
-          side: BorderSide(color: Colors.black, width: 2),
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(25),
-              topRight: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-              bottomLeft: Radius.circular(25))),
-      trailing: GestureDetector(
-        child: Icon(
-          Icons.arrow_forward,
-          color: Colors.red.shade600,
-        ),
-        onTap: () async {
-          debugPrint("gay");
+            );
+          }
         },
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          color: Colors.deepPurple,
+        ),
       ),
     );
   }
 
   Map data = {};
+  List<Widget> topics = [];
+  bool ans = false;
 
   @override
   void initState() {
@@ -146,54 +136,51 @@ class _MyHomePageState extends State<MyHomePage> {
     widget.data.forEach((key, value) {
       temptopics.add(buildTopics(key, value));
     });
-    // Handle non-successful response
+
     setState(() {
       topics.addAll(temptopics);
     });
   }
 
-  String urll = "";
-  List<Widget> topics = [];
-  Map masterTopicDict = {};
-  bool ans = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Colors.deepPurple,
         centerTitle: true,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Placeholder for left-alignment
-            Center(child: Text(widget.title)),
-            FlutterSwitch(
-              activeText: "ANS",
-              inactiveText: "MCQ",
-              value: ans,
-              activeTextColor: Colors.black,
-              valueFontSize: 10.0,
-              activeColor: Colors.grey.shade700,
-              inactiveTextColor: Colors.grey.shade500,
-              inactiveColor: Colors.black,
-              width: 65,
-              showOnOff: true,
-              onToggle: (val) async {
-                setState(() {
-                  ans = !ans;
-                });
-              },
-            ),
-          ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ),
         ),
+        title: Text(widget.title),
+        actions: [
+          FlutterSwitch(
+            activeText: "ANS",
+            inactiveText: "MCQ",
+            value: ans,
+            activeTextColor: Colors.black,
+            valueFontSize: 10.0,
+            activeColor: Colors.grey.shade700,
+            inactiveTextColor: Colors.grey.shade500,
+            inactiveColor: Colors.black,
+            width: 65,
+            showOnOff: true,
+            onToggle: (val) {
+              setState(() {
+                ans = val;
+              });
+            },
+          ),
+        ],
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: ListView.builder(
           itemCount: topics.length,
           itemBuilder: (BuildContext context, int index) {
             return Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: topics[index],
             );
           },
@@ -201,9 +188,10 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: sendGet,
-        tooltip: 'Increment',
-        child: const Icon(Icons.upload_file),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        tooltip: 'Fetch Topics',
+        backgroundColor: Colors.deepPurple,
+        child: const Icon(Icons.refresh),
+      ),
     );
   }
 }

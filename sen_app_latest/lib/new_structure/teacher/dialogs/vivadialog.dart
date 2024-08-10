@@ -3,7 +3,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart';
 import 'dart:io';
 import 'dart:developer' as dev;
 
@@ -13,7 +12,8 @@ class VivaDialog extends StatefulWidget {
   final String username;
   final Map classData;
 
-  const VivaDialog({super.key, required this.username, required this.classData});
+  const VivaDialog(
+      {super.key, required this.username, required this.classData});
 
   @override
   VivaDialogState createState() => VivaDialogState();
@@ -40,9 +40,9 @@ class VivaDialogState extends State<VivaDialog> {
       // Add the viva details to the 'viva' collection
       DocumentReference vivaRef =
           await FirebaseFirestore.instance.collection('viva').add({
-        'vivaname': vivaName ?? '',
-        'start': start ?? FieldValue.serverTimestamp(),
-        'end': end ?? FieldValue.serverTimestamp(),
+        'vivaname': vivaName,
+        'start': start,
+        'end': end,
         'created': FieldValue.serverTimestamp(),
         'vivatext': vivatext,
         'teacher': teacherUsername,
@@ -118,10 +118,11 @@ class VivaDialogState extends State<VivaDialog> {
             vivaName: title,
             start: startDate,
             end: endDate,
-            vivatext: geminiResponse,
+            vivatext:
+                geminiResponse, // The response you get from the Gemini API
             teacherUsername: widget.username,
-            className: widget.classData['classname'] ?? '',
-            code: widget.classData['code'] ?? '');
+            className: widget.classData['classname'],
+            code: widget.classData['code']);
 
         setState(() {
           fileUploaded = true;
@@ -148,6 +149,11 @@ class VivaDialogState extends State<VivaDialog> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+  }
+
   Future<List<Map<String, dynamic>>> fetchVivaDetails(
       String teacherUsername) async {
     try {
@@ -157,24 +163,12 @@ class VivaDialogState extends State<VivaDialog> {
           .get();
 
       List<Map<String, dynamic>> vivaDetails = querySnapshot.docs.map((doc) {
-        var data = doc.data() as Map<String, dynamic>;
-
-        // Safely handle the timestamp fields
-        DateTime? start = data['start'] != null
-            ? (data['start'] as Timestamp).toDate()
-            : null;
-        DateTime? end = data['end'] != null ? (data['end'] as Timestamp).toDate() : null;
-
-        return {
-          ...data,
-          'start': start,
-          'end': end,
-        };
+        return doc.data() as Map<String, dynamic>;
       }).toList();
 
       return vivaDetails;
     } catch (e) {
-      dev.log('Failed to fetch Viva details: $e');
+      debugPrint('Failed to fetch Viva details: $e');
       return [];
     }
   }
@@ -301,12 +295,8 @@ class VivaDialogState extends State<VivaDialog> {
   }
 
   Widget buildProgressIndicator() {
-    return Center(
-      child: Lottie.network(
-        'https://lottie.host/bf54bc22-5ef0-44db-872f-6c859e16384d/OXWwJtv9g5.json',
-        width: 150,
-        height: 150,
-      ),
+    return const Center(
+      child: CircularProgressIndicator(),
     );
   }
 
@@ -327,194 +317,175 @@ class VivaDialogState extends State<VivaDialog> {
   }
 
   Future<String> _sendFileToGemini(String extractedtext) async {
+    // Define the mime type for PDF
     dev.log('Entered send file to gemini');
-    const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc'; // Replace with your Google API Key
+    const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc';
+    // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
     final model = GenerativeModel(
         model: 'gemini-1.5-pro',
         apiKey: apiKey,
         generationConfig:
             GenerationConfig(responseMimeType: "application/json"));
+    // Create the content to send to Gemini
     final content = [
       Content.text('''
       {
-        "instructions": [
-          "Here is an article. Please read it carefully and then answer the following questions: ",
-          "1. Identify the main topics discussed in the article."
-        ],
-        "text": "$extractedtext",
-        "desired_output": [
-          "For each identified topic, generate 3 multiple-choice questions with only easy and hard difficulty levels.",
-          "You should have a maximum of 4 topics.",
-          "Structure the output in the following JSON format:",
-          "{topicname: {questionNumber: {question: 'question here', difficultyLevel: 'difficulty', answer: 'answer here', options: ['4 options here']}}}"
-        ],
-        "examples": {
-          "good": [
-            {
-              "Neural Networks": {
-                "1": {
-                  "question": "What is a neural network inspired by?",
-                  "difficultyLevel": "easy",
-                  "answer": "Biological neural networks",
-                  "options": [
-                    "Biological neural networks",
-                    "Mechanical systems",
-                    "Quantum computing",
-                    "Traditional algorithms"
-                  ]
-                },
-                "2": {
-                  "question": "Which learning method involves the network adjusting weights based on errors?",
-                  "difficultyLevel": "hard",
-                  "answer": "Supervised learning",
-                  "options": [
-                    "Unsupervised learning",
-                    "Reinforcement learning",
-                    "Supervised learning",
-                    "Semi-supervised learning"
-                  ]
-                },
-                "3": {
-                  "question": "What is a key feature of recurrent neural networks?",
-                  "difficultyLevel": "easy",
-                  "answer": "Information flows in a loop",
-                  "options": [
-                    "Information flows in a loop",
-                    "Information flows in one direction",
-                    "They are used for image recognition",
-                    "They have a fixed number of layers"
-                  ]
-                }
-              }
-            },
-            {
-              "Evolution and Biological Inspiration": {
-                "1": {
-                  "question": "What inspired the development of neural networks?",
-                  "difficultyLevel": "easy",
-                  "answer": "The brain's ability to solve complex problems",
-                  "options": [
-                    "The brain's ability to solve complex problems",
-                    "Advancements in traditional computing",
-                    "Development of new programming languages",
-                    "Increased data storage capabilities"
-                  ]
-                },
-                "2": {
-                  "question": "When did significant advances in neural networks occur?",
-                  "difficultyLevel": "hard",
-                  "answer": "Late 1980s",
-                  "options": [
-                    "Early 1940s",
-                    "Late 1980s",
-                    "Early 2000s",
-                    "Late 1990s"
-                  ]
-                },
-                "3": {
-                  "question": "What function do synapses serve in a neuron?",
-                  "difficultyLevel": "easy",
-                  "answer": "Connect axons to dendrites",
-                  "options": [
-                    "Connect axons to dendrites",
-                    "Process information",
-                    "Transmit electrical signals",
-                    "Store memories"
-                  ]
-                }
-              }
-            },
-            {
-              "Training Methods": {
-                "1": {
-                  "question": "Which learning method involves the network self-organizing based on input features?",
-                  "difficultyLevel": "hard",
-                  "answer": "Unsupervised learning",
-                  "options": [
-                    "Supervised learning",
-                    "Unsupervised learning",
-                    "Reinforcement learning",
-                    "Semi-supervised learning"
-                  ]
-                },
-                "2": {
-                  "question": "What is the primary goal of supervised learning?",
-                  "difficultyLevel": "easy",
-                  "answer": "Adjust weights based on errors",
-                  "options": [
-                    "Adjust weights based on errors",
-                    "Self-organize based on input features",
-                    "Maximize reward signals",
-                    "Minimize training time"
-                  ]
-                },
-                "3": {
-                  "question": "What type of neural network is suitable for time-series forecasting?",
-                  "difficultyLevel": "hard",
-                  "answer": "Recurrent neural networks",
-                  "options": [
-                    "Feedforward neural networks",
-                    "Recurrent neural networks",
-                    "Auto-associative neural networks",
-                    "Convolutional neural networks"
-                  ]
-                }
-              }
-            }
-          ],
-          "bad": [
-            {
-              "Neural Networks": {
-                "question1": {
-                  "question": "What is the color of the sky?",
-                  "difficultyLevel": "easy",
-                  "answer": "Blue",
-                  "options": ["Blue", "Green", "Red", "Yellow"]
-                },
-                "question2": {
-                  "question": "How many continents are there?",
-                  "difficultyLevel": "hard",
-                  "answer": "Seven",
-                  "options": ["Five", "Six", "Seven", "Eight"]
-                },
-                "3": {
-                  "question": "Which is the largest ocean?",
-                  "difficultyLevel": "easy",
-                  "answer": "Pacific Ocean",
-                  "options": [
-                    "Atlantic Ocean",
-                    "Indian Ocean",
-                    "Arctic Ocean",
-                    "Pacific Ocean"
-                  ]
-                }
-              }
-            },
-            {
-              "Neural Networks": {
-                "1": {
-                  "question": "What is it?",
-                  "difficultyLevel": "easy",
-                  "answer": "",
-                  "options": ["", "", "", ""]
-                },
-                "2": {
-                  "question": "Explain the concept.",
-                  "difficultyLevel": "hard",
-                  "answer": "",
-                  "options": ["", "", "", ""]
-                },
-                "3": {
-                  "question": "What do you think?",
-                  "difficultyLevel": "easy",
-                  "answer": "",
-                  "options": ["", "", "", ""]
-                }
-              }
-            }
+        {
+  "instructions": [
+    "Here is an article. Please read it carefully and then answer the following questions: ",
+    "1. Identify 10 key points discussed in the article."
+  ],
+  "text": "$extractedtext",
+  "desired_output": [
+    "Generate 10 multiple-choice questions based on the key points identified, with easy and hard difficulty levels.",
+    "Structure the output in the following JSON format:",
+    "{questionNumber: {question: 'question here', difficultyLevel: 'difficulty', answer: 'answer here', options: ['4 options here']}}"
+  ],
+  "examples": {
+    "good": [
+      {
+        "1": {
+          "question": "What is a neural network inspired by?",
+          "difficultyLevel": "easy",
+          "answer": "Biological neural networks",
+          "options": [
+            "Biological neural networks",
+            "Mechanical systems",
+            "Quantum computing",
+            "Traditional algorithms"
+          ]
+        },
+        "2": {
+          "question": "Which learning method involves the network adjusting weights based on errors?",
+          "difficultyLevel": "hard",
+          "answer": "Supervised learning",
+          "options": [
+            "Unsupervised learning",
+            "Reinforcement learning",
+            "Supervised learning",
+            "Semi-supervised learning"
+          ]
+        },
+        "3": {
+          "question": "What is a key feature of recurrent neural networks?",
+          "difficultyLevel": "easy",
+          "answer": "Information flows in a loop",
+          "options": [
+            "Information flows in a loop",
+            "Information flows in one direction",
+            "They are used for image recognition",
+            "They have a fixed number of layers"
+          ]
+        },
+        "4": {
+          "question": "What inspired the development of neural networks?",
+          "difficultyLevel": "easy",
+          "answer": "The brain's ability to solve complex problems",
+          "options": [
+            "The brain's ability to solve complex problems",
+            "Advancements in traditional computing",
+            "Development of new programming languages",
+            "Increased data storage capabilities"
+          ]
+        },
+        "5": {
+          "question": "When did significant advances in neural networks occur?",
+          "difficultyLevel": "hard",
+          "answer": "Late 1980s",
+          "options": [
+            "Early 1940s",
+            "Late 1980s",
+            "Early 2000s",
+            "Late 1990s"
+          ]
+        },
+        "6": {
+          "question": "What function do synapses serve in a neuron?",
+          "difficultyLevel": "easy",
+          "answer": "Connect axons to dendrites",
+          "options": [
+            "Connect axons to dendrites",
+            "Process information",
+            "Transmit electrical signals",
+            "Store memories"
+          ]
+        },
+        "7": {
+          "question": "Which learning method involves the network self-organizing based on input features?",
+          "difficultyLevel": "hard",
+          "answer": "Unsupervised learning",
+          "options": [
+            "Supervised learning",
+            "Unsupervised learning",
+            "Reinforcement learning",
+            "Semi-supervised learning"
+          ]
+        },
+        "8": {
+          "question": "What is the primary goal of supervised learning?",
+          "difficultyLevel": "easy",
+          "answer": "Adjust weights based on errors",
+          "options": [
+            "Adjust weights based on errors",
+            "Self-organize based on input features",
+            "Maximize reward signals",
+            "Minimize training time"
+          ]
+        },
+        "9": {
+          "question": "What type of neural network is suitable for time-series forecasting?",
+          "difficultyLevel": "hard",
+          "answer": "Recurrent neural networks",
+          "options": [
+            "Feedforward neural networks",
+            "Recurrent neural networks",
+            "Auto-associative neural networks",
+            "Convolutional neural networks"
+          ]
+        },
+        "10": {
+          "question": "Which neural network architecture is primarily used for image processing?",
+          "difficultyLevel": "easy",
+          "answer": "Convolutional neural networks",
+          "options": [
+            "Convolutional neural networks",
+            "Recurrent neural networks",
+            "Generative adversarial networks",
+            "Radial basis function networks"
           ]
         }
       }
+    ],
+    "bad": [
+      {
+        "1": {
+          "question": "What is the color of the sky?",
+          "difficultyLevel": "easy",
+          "answer": "Blue",
+          "options": ["Blue", "Green", "Red", "Yellow"]
+        },
+        "2": {
+          "question": "How many continents are there?",
+          "difficultyLevel": "hard",
+          "answer": "Seven",
+          "options": ["Five", "Six", "Seven", "Eight"]
+        },
+        "3": {
+          "question": "Which is the largest ocean?",
+          "difficultyLevel": "easy",
+          "answer": "Pacific Ocean",
+          "options": [
+            "Atlantic Ocean",
+            "Indian Ocean",
+            "Arctic Ocean",
+            "Pacific Ocean"
+          ]
+        }
+      }
+    ]
+  }
+}
+
       ''')
     ];
 

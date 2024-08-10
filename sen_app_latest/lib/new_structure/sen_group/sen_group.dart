@@ -26,7 +26,9 @@ class _SenGroupPageState extends State<SenGroupPage> {
   String? summaryResponse;
   bool _isBottomSheetVisible = false;
 
-  static const apiKey = 'YOUR_API_KEY'; // Replace with your actual API key
+  Offset floatingButtonOffset = Offset(20, 100); // Initialize with default position
+
+  static const apiKey = 'YOUR_API_KEY_HERE';
   final model = 'gemini-1.5-pro';
 
   @override
@@ -43,7 +45,6 @@ class _SenGroupPageState extends State<SenGroupPage> {
 
     if (snapshot.exists) {
       final data = snapshot.data()!;
-      // Load text content
       if (data.containsKey('textContent')) {
         setState(() {
           contentList.add(Padding(
@@ -52,7 +53,6 @@ class _SenGroupPageState extends State<SenGroupPage> {
           ));
         });
       }
-      // Load other content types here (e.g., images, PDFs)
     }
   }
 
@@ -61,8 +61,19 @@ class _SenGroupPageState extends State<SenGroupPage> {
 
     await FirebaseFirestore.instance.collection('sessions').doc(widget.sessionCode).set({
       'textContent': textContent,
-      // Save other content types here (e.g., images, PDFs)
     });
+
+    // Display the save notification only in SenGroupPage
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Session saved successfully!', textAlign: TextAlign.center),
+      backgroundColor: Colors.teal,
+      duration: const Duration(seconds: 2),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      margin: const EdgeInsets.only(top: 0.0),
+    ));
   }
 
   void _uploadFile({int? insertIndex}) async {
@@ -83,7 +94,6 @@ class _SenGroupPageState extends State<SenGroupPage> {
         _addFile(fileName, filePath, insertIndex: insertIndex);
       }
 
-      // Save the session to Firebase after adding content
       _saveSessionToFirebase();
     }
   }
@@ -102,7 +112,7 @@ class _SenGroupPageState extends State<SenGroupPage> {
         contentList.add(imageWidget);
       }
     });
-    _saveSessionToFirebase(); // Save the session after adding an image
+    _saveSessionToFirebase();
   }
 
   void _addPdf(String fileName, String filePath, {int? insertIndex}) {
@@ -131,7 +141,7 @@ class _SenGroupPageState extends State<SenGroupPage> {
         contentList.add(pdfWidget);
       }
     });
-    _saveSessionToFirebase(); // Save the session after adding a PDF
+    _saveSessionToFirebase();
   }
 
   void _addFile(String fileName, String filePath, {int? insertIndex}) {
@@ -155,7 +165,7 @@ class _SenGroupPageState extends State<SenGroupPage> {
         contentList.add(fileWidget);
       }
     });
-    _saveSessionToFirebase(); // Save the session after adding a file
+    _saveSessionToFirebase();
   }
 
   void _toggleTheme() {
@@ -178,7 +188,6 @@ class _SenGroupPageState extends State<SenGroupPage> {
     List<String> sessionText = [];
     List<String> sessionImages = [];
 
-    // Extract text and image content from the session
     for (var widget in contentList) {
       if (widget is Padding && widget.child is Text) {
         sessionText.add((widget.child as Text).data ?? '');
@@ -199,7 +208,9 @@ class _SenGroupPageState extends State<SenGroupPage> {
     _showSummaryBar(content, sessionImages);
 
     try {
+      await _saveSessionToFirebase();  // Save session before summarizing
       summaryResponse = await _getSummaryFromGemini(content, sessionImages);
+      print(summaryResponse);
     } catch (e) {
       summaryResponse = "Failed to generate summary.";
     } finally {
@@ -212,7 +223,7 @@ class _SenGroupPageState extends State<SenGroupPage> {
   }
 
   Future<String> _getSummaryFromGemini(String content, List<String> images) async {
-    final url = Uri.parse('https://api.your-service.com/generate-summary'); // Update with actual Gemini API URL
+    final url = Uri.parse('https://api.your-service.com/generate-summary');
     final response = await http.post(
       url,
       headers: {
@@ -342,7 +353,7 @@ class _SenGroupPageState extends State<SenGroupPage> {
                                   ),
                                 );
                                 _textController.clear();
-                                _saveSessionToFirebase(); // Save the session after adding text
+                                _saveSessionToFirebase();
                               });
                             },
                           );
@@ -358,14 +369,18 @@ class _SenGroupPageState extends State<SenGroupPage> {
                     ),
                   ),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // Place buttons on opposite sides
                     children: [
                       IconButton(
                         icon: Icon(Icons.add, color: isDarkTheme ? Colors.teal : Colors.black),
                         onPressed: () => _uploadFile(),
                       ),
-                      Text(
-                        'Upload Image, PDF, Document...',
-                        style: TextStyle(color: isDarkTheme ? Colors.grey : Colors.black54),
+                      ElevatedButton(
+                        onPressed: _saveSessionToFirebase,
+                        child: Text('Save'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                        ),
                       ),
                     ],
                   ),
@@ -421,10 +436,36 @@ class _SenGroupPageState extends State<SenGroupPage> {
                 : SizedBox.shrink(),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _toggleBottomSheet,
-          backgroundColor: Colors.teal,
-          child: Icon(_isBottomSheetVisible ? Icons.close : Icons.summarize, color: Colors.white),
+        floatingActionButton: Stack(
+          children: [
+            Positioned(
+              left: floatingButtonOffset.dx,
+              top: floatingButtonOffset.dy,
+              child: GestureDetector(
+                onPanUpdate: (details) {
+                  setState(() {
+                    floatingButtonOffset += details.delta;
+                  });
+                },
+                child: FloatingActionButton(
+                  onPressed: _toggleBottomSheet,
+                  backgroundColor: Colors.transparent,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color.fromARGB(255, 199, 205, 204).withOpacity(0.8), // Slightly transparent background
+                    ),
+                    padding: EdgeInsets.all(8), // Padding inside the round button
+                    child: Lottie.network(
+                      'https://lottie.host/bf54bc22-5ef0-44db-872f-6c859e16384d/OXWwJtv9g5.json',
+                      height: 40,
+                      width: 40,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -442,7 +483,7 @@ class PDFViewerScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('PDF Viewer'),
       ),
-      body: SfPdfViewer.file(File(filePath)), // Proper PDF Viewer implementation
+      body: SfPdfViewer.file(File(filePath)),
     );
   }
 }

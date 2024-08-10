@@ -1,21 +1,21 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:developer' as dev;
 import 'package:intl/intl.dart';
-import 'package:sen_app_latest/new_structure/teacher/dialogs/vivadialog.dart';
-import 'package:sen_app_latest/new_structure/teacher/teachergrid.dart';
+import 'package:sen_app_latest/new_structure/student/studentquestions.dart';
 
-class TeacherViva extends StatefulWidget {
-  const TeacherViva(
+class StudentViva extends StatefulWidget {
+  const StudentViva(
       {super.key, required this.classData, required this.username});
   final Map classData;
   final String username;
 
   @override
-  TeacherVivaState createState() => TeacherVivaState();
+  StudentVivaState createState() => StudentVivaState();
 }
 
-class TeacherVivaState extends State<TeacherViva> {
+class StudentVivaState extends State<StudentViva> {
   // List of vivas
   List<Widget> viva = [];
 
@@ -48,9 +48,16 @@ class TeacherVivaState extends State<TeacherViva> {
             DateFormat('dd-MM-yy HH:mm:ss').format(startDate);
         String formattedEnd = DateFormat('dd-MM-yy HH:mm:ss').format(endDate);
 
+        // Determine if the button should be enabled based on the start date and student status
+        bool isButtonEnabled = DateTime.now().isAfter(startDate);
+
+        // Check the student's status in the current viva document
+        String studentStatus =
+            data['students']?[widget.username]?['status'] ?? 'pending';
+
         // Pass the formatted string to the buildViva function
-        tempViva.add(
-            buildViva(data['vivaname'], formattedStart, formattedEnd, doc.id));
+        tempViva.add(buildViva(data['vivaname'], formattedStart, formattedEnd,
+            doc.id, isButtonEnabled, data, studentStatus));
       }
       setState(() {
         viva.addAll(tempViva);
@@ -60,7 +67,13 @@ class TeacherVivaState extends State<TeacherViva> {
     }
   }
 
-  Widget buildViva(String vivaname, String start, String end, String vivaId) {
+  Widget buildViva(String vivaname, String start, String end, String vivaId,
+      bool isButtonEnabled, Map<String, dynamic> data, String studentStatus) {
+    // Determine the button state and text based on the student's status
+    bool isStudentDone = studentStatus == 'done';
+    String buttonText = isStudentDone ? 'Done' : 'Start Viva';
+    bool buttonEnabled = isButtonEnabled && !isStudentDone;
+
     return Card(
       margin: const EdgeInsets.all(10.0),
       child: ListTile(
@@ -82,19 +95,27 @@ class TeacherVivaState extends State<TeacherViva> {
             ),
           ],
         ),
-        trailing: IconButton(
-          icon:
-              const Icon(Icons.group), // Use a group icon to represent students
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TeacherGridPage(
-                  vivaId: vivaId,
-                ),
-              ),
-            );
-          },
+        trailing: ElevatedButton(
+          onPressed: buttonEnabled
+              ? () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => StudentQuestions(
+                        data: jsonDecode(data['vivatext']),
+                        name: data['class'],
+                        vivaId: vivaId,
+                        username: widget.username,
+                      ),
+                    ),
+                  );
+                  fetchVivaDetails();
+                }
+              : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: buttonEnabled ? Colors.green : Colors.grey,
+          ),
+          child: Text(buttonText),
         ),
       ),
     );
@@ -119,28 +140,6 @@ class TeacherVivaState extends State<TeacherViva> {
                 Navigator.pop(context);
               },
               child: const Icon(Icons.arrow_back)),
-          actions: [
-            IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () async {
-                  await showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return VivaDialog(
-                        username: widget.username,
-                        classData: widget.classData,
-                      );
-                    },
-                  ).then((result) {
-                    if (result != null) {
-                      // Handle the creation of the Viva with the returned data
-                      dev.log('Viva created with: $result');
-                      fetchVivaDetails();
-                      // You can add the viva data to your list or send it to Firestore here
-                    }
-                  });
-                })
-          ],
         ),
         body: Center(
           child: ListView.builder(

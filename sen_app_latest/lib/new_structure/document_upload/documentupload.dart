@@ -119,7 +119,7 @@ class _DocumentUploadState extends State<DocumentUpload> {
 
   Future<String> _sendFileToGemini(String extractedtext) async {
     log('Sending file to Gemini');
-    const apiKey = 'Your-API-Key-Here';
+    const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc';
     final model = GenerativeModel(
         model: 'gemini-1.5-pro',
         apiKey: apiKey,

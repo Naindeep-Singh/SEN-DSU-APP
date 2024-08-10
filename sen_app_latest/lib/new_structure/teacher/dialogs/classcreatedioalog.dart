@@ -33,9 +33,8 @@ class ClassFormDialogState extends State<ClassFormDialog> {
 
       try {
         // Send data to Firestore and get the document reference
-        DocumentReference classDocRef = await FirebaseFirestore.instance
-            .collection('classes')
-            .add({
+        DocumentReference classDocRef =
+            await FirebaseFirestore.instance.collection('classes').add({
           'classname': _classNameController.text,
           'description': _descriptionController.text,
           'code': generatedCode,
@@ -114,10 +113,14 @@ class ClassFormDialogState extends State<ClassFormDialog> {
                 IconButton(
                   icon: const Icon(Icons.copy),
                   onPressed: () {
-                    Clipboard.setData(ClipboardData(text: generatedCode));
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Code copied to clipboard!'),
-                    ));
+                    try {
+                      Clipboard.setData(ClipboardData(text: generatedCode));
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Code copied to clipboard!'),
+                      ));
+                    } catch (e) {
+                      debugPrint('$e');
+                    }
                   },
                 ),
               ],
