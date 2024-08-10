@@ -86,7 +86,7 @@ class StudentSessionState extends State<StudentSession> {
       DocumentSnapshot sessionDoc = sessionQuery.docs.first;
       List<dynamic> joinedUsers = sessionDoc['joinedUsers'] ?? [];
 
-      // Check if the user has already joined
+      // Add the user to the session if not already joined
       if (!joinedUsers.contains(username)) {
         joinedUsers.add(username);
         await sessionDoc.reference.update({
@@ -94,19 +94,27 @@ class StudentSessionState extends State<StudentSession> {
         });
       }
 
+      // Add the session to the banner list if not already there
+      bool sessionExists = sessions.any((session) => session['code'] == code);
+      if (!sessionExists) {
+        setState(() {
+          sessions.add({
+            'title': sessionDoc['sessionTitle'],
+            'code': sessionDoc['code'],
+            'username': sessionDoc['username'], // Store the creator's username
+          });
+          filteredSessions = sessions; // Update filtered list
+        });
+      }
+
       if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SenGroupPage(
-              sessionTitle: sessionDoc['sessionTitle'],
-              sessionCode: sessionDoc['code'],
-              username: widget.username,
-            ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Session joined successfully'),
+            backgroundColor: Colors.green,
           ),
         );
       }
-      // Navigate to the session page
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -123,6 +131,20 @@ class StudentSessionState extends State<StudentSession> {
     try {
       // Get the session code of the session to be deleted
       String? sessionCode = sessions[index]['code'];
+      String? sessionCreator = sessions[index]['username'];
+
+      // Ensure the current user is the creator of the session
+      if (sessionCreator != widget.username) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Only the creator can delete this session'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+        return;
+      }
 
       // Query Firestore to find the document with the matching session code
       final sessionQuery = await FirebaseFirestore.instance
@@ -154,7 +176,7 @@ class StudentSessionState extends State<StudentSession> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text(''), //comment to shoe on the serch bar
+              content: Text('Failed to find the session for deletion'),
               backgroundColor: Colors.redAccent,
             ),
           );
@@ -318,7 +340,56 @@ class StudentSessionState extends State<StudentSession> {
     );
   }
 
+  void _showMembers(List<dynamic> members, String creator) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: const EdgeInsets.all(12.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          title: const Text('Session Members', style: TextStyle(color: Colors.teal)),
+          content: SizedBox(
+            width: double.minPositive,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: members.length,
+              itemBuilder: (context, index) {
+                String username = members[index];
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  margin: const EdgeInsets.symmetric(vertical: 5.0),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: AssetImage('assets/default_profile.png'), // Placeholder for profile picture
+                      radius: 20.0,
+                    ),
+                    title: Text('@$username', style: const TextStyle(color: Colors.black)),
+                    subtitle: username == creator ? Text('Created by You', style: TextStyle(color: Colors.grey[700])) : null,
+                  ),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close', style: TextStyle(color: Colors.teal)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildBanner(Map<String, String?> session, int index) {
+    bool isCreator = session['username'] == widget.username;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -370,18 +441,32 @@ class StudentSessionState extends State<StudentSession> {
                   if (session['code'] != null)
                     Text(
                       'Sen Code: ${session['code']}',
-                      style:
-                          const TextStyle(color: Colors.teal, fontSize: 16.0),
+                      style: const TextStyle(color: Colors.teal, fontSize: 16.0),
                     ),
                 ],
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.delete, color: Colors.redAccent),
-              onPressed: () {
-                _deleteSession(index);
+              icon: const Icon(Icons.group, color: Colors.blueAccent),
+              onPressed: () async {
+                final sessionQuery = await FirebaseFirestore.instance
+                    .collection('Sessions')
+                    .where('code', isEqualTo: session['code'])
+                    .limit(1)
+                    .get();
+                if (sessionQuery.docs.isNotEmpty) {
+                  List<dynamic> members = sessionQuery.docs.first['joinedUsers'];
+                  _showMembers(members, session['username']!);
+                }
               },
             ),
+            if (isCreator)
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.redAccent),
+                onPressed: () {
+                  _deleteSession(index);
+                },
+              ),
           ],
         ),
       ),
@@ -432,7 +517,7 @@ class StudentSessionState extends State<StudentSession> {
                       )
                     : const Center(
                         child: Text(
-                          '', //search bar notification if you want to add
+                          '', // Optional: Add a message for no sessions found
                           style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
                       ),
