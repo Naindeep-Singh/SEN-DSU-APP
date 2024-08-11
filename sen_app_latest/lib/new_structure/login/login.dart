@@ -46,6 +46,7 @@ class LoginPageState extends State<LoginPage> {
 
   Future<void> login() async {
     try {
+      // Query Firestore to find the user by username and password
       final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('username', isEqualTo: _usernameController.text)
@@ -54,7 +55,8 @@ class LoginPageState extends State<LoginPage> {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        final userData = querySnapshot.docs.first.data() as Map<String, dynamic>;
+        final userData =
+            querySnapshot.docs.first.data() as Map<String, dynamic>;
         final String username = userData['username'];
         final String userType = userData['type'];
 
@@ -63,13 +65,30 @@ class LoginPageState extends State<LoginPage> {
         // Redirect to SENPage with appropriate userType
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => SENPage(username: username, userType: userType),
+            builder: (context) =>
+                SENPage(username: username, userType: userType),
           ),
         );
       } else {
-        setState(() {
-          errorMessage = 'Invalid username or password';
+        // If the user does not exist, create a new entry in the 'users' collection
+        await FirebaseFirestore.instance.collection('users').add({
+          'username': _usernameController.text,
+          'password': _passwordController.text,
+          'email': _emailController.text,
+          'type': isTeacher ? 'teacher' : 'student',
         });
+
+        debugPrint('New user added to Firestore during login');
+
+        // Redirect to SENPage after adding the user
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => SENPage(
+              username: _usernameController.text,
+              userType: isTeacher ? 'teacher' : 'student',
+            ),
+          ),
+        );
       }
     } catch (e) {
       debugPrint('$e');
@@ -123,7 +142,8 @@ class LoginPageState extends State<LoginPage> {
       if (googleUser == null) {
         return null; // The user canceled the sign-in
       }
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -146,7 +166,10 @@ class LoginPageState extends State<LoginPage> {
 
         if (querySnapshot.docs.isEmpty) {
           // If the user does not exist, add them to the Firestore users collection
-          await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .set({
             'uid': user.uid,
             'username': username,
             'email': user.email,
@@ -160,7 +183,8 @@ class LoginPageState extends State<LoginPage> {
         // Redirect based on user type
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => SENPage(username: username, userType: userType),
+            builder: (context) =>
+                SENPage(username: username, userType: userType),
           ),
         );
 
@@ -169,7 +193,8 @@ class LoginPageState extends State<LoginPage> {
     } catch (e) {
       print(e);
       setState(() {
-        errorMessage = 'An error occurred during Google sign-in. Please try again.';
+        errorMessage =
+            'An error occurred during Google sign-in. Please try again.';
       });
     }
     return null;
@@ -217,7 +242,8 @@ class LoginPageState extends State<LoginPage> {
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isTeacher ? Colors.cyan.shade700 : Colors.grey[800],
+                        backgroundColor:
+                            isTeacher ? Colors.cyan.shade700 : Colors.grey[800],
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -246,7 +272,9 @@ class LoginPageState extends State<LoginPage> {
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: !isTeacher ? Colors.cyan.shade700 : Colors.grey[800],
+                        backgroundColor: !isTeacher
+                            ? Colors.cyan.shade700
+                            : Colors.grey[800],
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -270,7 +298,8 @@ class LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -283,7 +312,8 @@ class LoginPageState extends State<LoginPage> {
                             decoration: InputDecoration(
                               labelText: 'Username',
                               hintText: 'Enter your username',
-                              prefixIcon: const Icon(Icons.person, color: Colors.cyan),
+                              prefixIcon:
+                                  const Icon(Icons.person, color: Colors.cyan),
                               filled: true,
                               fillColor: Colors.grey[200],
                               border: OutlineInputBorder(
@@ -309,7 +339,8 @@ class LoginPageState extends State<LoginPage> {
                             decoration: InputDecoration(
                               labelText: 'Password',
                               hintText: 'Enter your password',
-                              prefixIcon: const Icon(Icons.lock, color: Colors.cyan),
+                              prefixIcon:
+                                  const Icon(Icons.lock, color: Colors.cyan),
                               filled: true,
                               fillColor: Colors.grey[200],
                               border: OutlineInputBorder(
@@ -335,7 +366,8 @@ class LoginPageState extends State<LoginPage> {
                             decoration: InputDecoration(
                               labelText: 'Email',
                               hintText: 'Enter your email',
-                              prefixIcon: const Icon(Icons.email, color: Colors.cyan),
+                              prefixIcon:
+                                  const Icon(Icons.email, color: Colors.cyan),
                               filled: true,
                               fillColor: Colors.grey[200],
                               border: OutlineInputBorder(
@@ -360,7 +392,8 @@ class LoginPageState extends State<LoginPage> {
                             decoration: InputDecoration(
                               labelText: 'Username',
                               hintText: 'Enter your username',
-                              prefixIcon: const Icon(Icons.person, color: Colors.cyan),
+                              prefixIcon:
+                                  const Icon(Icons.person, color: Colors.cyan),
                               filled: true,
                               fillColor: Colors.grey[200],
                               border: OutlineInputBorder(
@@ -386,7 +419,8 @@ class LoginPageState extends State<LoginPage> {
                             decoration: InputDecoration(
                               labelText: 'Password',
                               hintText: 'Enter your password',
-                              prefixIcon: const Icon(Icons.lock, color: Colors.cyan),
+                              prefixIcon:
+                                  const Icon(Icons.lock, color: Colors.cyan),
                               filled: true,
                               fillColor: Colors.grey[200],
                               border: OutlineInputBorder(
@@ -412,7 +446,8 @@ class LoginPageState extends State<LoginPage> {
                             decoration: InputDecoration(
                               labelText: 'Confirm Password',
                               hintText: 'Confirm your password',
-                              prefixIcon: const Icon(Icons.lock, color: Colors.cyan),
+                              prefixIcon:
+                                  const Icon(Icons.lock, color: Colors.cyan),
                               filled: true,
                               fillColor: Colors.grey[200],
                               border: OutlineInputBorder(
@@ -504,7 +539,8 @@ class LoginPageState extends State<LoginPage> {
                       final String username = user.displayName ?? "User";
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (context) => SENPage(username: username, userType: userType),
+                          builder: (context) =>
+                              SENPage(username: username, userType: userType),
                         ),
                       );
                     }
