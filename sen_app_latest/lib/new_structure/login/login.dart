@@ -74,13 +74,32 @@ class LoginPageState extends State<LoginPage> {
     } catch (e) {
       debugPrint('$e');
       setState(() {
-        errorMessage = e.toString();
+        errorMessage = 'An error occurred during login. Please try again.';
       });
     }
   }
 
   Future<void> signUp() async {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() {
+        errorMessage = 'Passwords do not match';
+      });
+      return;
+    }
+
     try {
+      final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('username', isEqualTo: _usernameController.text)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        setState(() {
+          errorMessage = 'Username already exists';
+        });
+        return;
+      }
+
       await FirebaseFirestore.instance.collection('users').add({
         'username': _usernameController.text,
         'password': _passwordController.text,
@@ -88,10 +107,12 @@ class LoginPageState extends State<LoginPage> {
         'type': isTeacher ? 'teacher' : 'student',
       });
       debugPrint('Sign up successful');
+      // Automatically log in the user after successful sign-up
+      await login();
     } catch (e) {
       debugPrint('$e');
       setState(() {
-        errorMessage = e.toString();
+        errorMessage = 'An error occurred during sign-up. Please try again.';
       });
     }
   }
@@ -99,7 +120,10 @@ class LoginPageState extends State<LoginPage> {
   Future<User?> _signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+      if (googleUser == null) {
+        return null; // The user canceled the sign-in
+      }
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -114,6 +138,25 @@ class LoginPageState extends State<LoginPage> {
         final String userType = isTeacher ? "teacher" : "student";
         final String username = user.displayName ?? "User";
 
+        // Check if the user already exists in Firestore
+        final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .where('uid', isEqualTo: user.uid)
+            .get();
+
+        if (querySnapshot.docs.isEmpty) {
+          // If the user does not exist, add them to the Firestore users collection
+          await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+            'uid': user.uid,
+            'username': username,
+            'email': user.email,
+            'type': userType,
+          });
+          debugPrint('New user added to Firestore');
+        } else {
+          debugPrint('User already exists in Firestore');
+        }
+
         // Redirect based on user type
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
@@ -126,7 +169,7 @@ class LoginPageState extends State<LoginPage> {
     } catch (e) {
       print(e);
       setState(() {
-        errorMessage = e.toString();
+        errorMessage = 'An error occurred during Google sign-in. Please try again.';
       });
     }
     return null;
