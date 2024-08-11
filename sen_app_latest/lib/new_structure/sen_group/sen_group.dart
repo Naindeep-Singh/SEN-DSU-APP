@@ -1,10 +1,8 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:lottie/lottie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -37,9 +35,6 @@ class SenGroupPageState extends State<SenGroupPage> {
 
   Offset floatingButtonOffset =
       const Offset(20, 100); // Initialize with default position
-
-  static const apiKey = 'AIzaSyCvxSwUiZdFR7PcSDzabYfpqKKLmHkOSuY';
-  final model = 'gemini-1.5-pro';
 
   @override
   void initState() {
@@ -89,7 +84,8 @@ class SenGroupPageState extends State<SenGroupPage> {
   Future<String> getSummary(
       String extractedText, String additionalNotes) async {
     log('getting summary from Gemini');
-    const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc';
+    log(extractedText);
+    const apiKey = 'AIzaSyBJoyuUGbTkuDbBeYtiShqke0FVUNLlZXY';
     final model = GenerativeModel(
         model: 'gemini-1.5-pro',
         apiKey: apiKey,
@@ -99,22 +95,22 @@ class SenGroupPageState extends State<SenGroupPage> {
     final content = [
       Content.text('''
     {
-     "instructions": [
-            "Carefully read the provided session text, images, and PDFs.",
-            "Generate a concise summary of the entire session content, including any relevant information from the images and PDFs.",
-            "If any questions were asked during the session, particularly related to topics such as addiction or any other mentioned topics, provide appropriate responses or answers to those questions.",
-            "If no session or questions were explicitly mentioned, generate responses based on the provided additional information or general context.",
-            "Output the summary and any relevant answers as a simple string, without JSON formatting."
-          ],
-          "text": "$extractedText",
-          "additionalNotes": "$additionalNotes",
-          "questions": "If there are any questions asked in the session, provide answers or guidance for those as well."
-        }
-        ''')
+      "instructions": [
+        "Carefully read the provided session text, images, and PDFs.",
+        "Generate a concise summary of the entire session content, including any relevant information from the images and PDFs.",
+        "If any questions were asked during the session, particularly related to topics such as addiction or any other mentioned topics, provide appropriate responses or answers to those questions.",
+        "If no session or questions were explicitly mentioned, generate responses based on the provided additional information or general context.",
+        "Output the summary and any relevant answers as plain text, without any special characters, asterisks, or formatting."
+      ],
+      "text": "$extractedText",
+      "additionalNotes": "$additionalNotes",
+      "questions": "If there are any questions asked in the session, provide answers or guidance for those as well."
+    }
+    ''')
     ];
 
     final response = await model.generateContent(content);
-    log("${response.text}");
+    debugPrint("$response");
     return "${response.text}";
   }
 
@@ -313,12 +309,13 @@ class SenGroupPageState extends State<SenGroupPage> {
 
     try {
       await _saveSessionToFirebase(); // Save session before summarizing
-      summaryResponse = await getSummary(getAllSessionText(), content);
+      String sessionText = getAllSessionText();
+      summaryResponse = await getSummary(sessionText, content);
       await _saveTextToFirebase('$summaryResponse', 'Gemini');
       await _loadSessionFromFirebase();
       debugPrint(summaryResponse);
     } catch (e) {
-      summaryResponse = "Failed to generate summary.";
+      summaryResponse = "Failed to generate summary.'$e";
     } finally {
       setState(() {
         isLoading = false;
