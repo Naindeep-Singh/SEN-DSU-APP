@@ -176,18 +176,19 @@ class VivaDialogState extends State<VivaDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Color.fromARGB(255, 27, 101, 77),
       title: const Text("Add Viva"),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
-            decoration: const InputDecoration(labelText: "Title"),
+            decoration: const InputDecoration(labelText: "Title", labelStyle: TextStyle(color: Colors.black)),
             onChanged: (value) {
               title = value;
             },
           ),
           TextField(
-            decoration: const InputDecoration(labelText: "Start Date"),
+            decoration: const InputDecoration(labelText: "Start Date", labelStyle: TextStyle(color: Colors.black)),
             readOnly: true,
             onTap: () async {
               DateTime? pickedDate = await showDatePicker(
@@ -221,7 +222,7 @@ class VivaDialogState extends State<VivaDialog> {
             ),
           ),
           TextField(
-            decoration: const InputDecoration(labelText: "End Date"),
+            decoration: const InputDecoration(labelText: "End Date", labelStyle: TextStyle(color: Colors.black)),
             readOnly: true,
             onTap: () async {
               DateTime? pickedDate = await showDatePicker(
@@ -270,12 +271,18 @@ class VivaDialogState extends State<VivaDialog> {
       ),
       actions: [
         TextButton(
+          style: ButtonStyle(
+    foregroundColor: MaterialStateProperty.all<Color>(Colors.orange), // Use foregroundColor
+  ),
           onPressed: () {
             Navigator.of(context).pop();
           },
           child: const Text("Cancel"),
         ),
         TextButton(
+          style: ButtonStyle(
+    foregroundColor: MaterialStateProperty.all<Color>(Colors.orange), // Use foregroundColor
+  ),
           onPressed: fileUploaded
               ? () {
                   if (title != null && startDate != null && endDate != null) {

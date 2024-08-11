@@ -24,7 +24,8 @@ class StudentClassesState extends State<StudentClasses> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              backgroundColor: Color.fromARGB(255, 21, 21, 78), // Dark background color
+              
+              backgroundColor: Color.fromARGB(255, 21, 78, 60), // Dark background color
               title: const Text(
                 "Join Class",
                 style: TextStyle(color: Colors.white), // Light text color
