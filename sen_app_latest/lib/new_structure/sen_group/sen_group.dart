@@ -53,19 +53,6 @@ class SenGroupPageState extends State<SenGroupPage> {
       'timestamp': FieldValue.serverTimestamp(),
       'username': username,
     });
-
-    // Display the save notification only in SenGroupPage
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content:
-          const Text('Text saved successfully!', textAlign: TextAlign.center),
-      backgroundColor: Colors.teal,
-      duration: const Duration(seconds: 2),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      margin: const EdgeInsets.only(top: 0.0),
-    ));
   }
 
   // Function to extract all text from the session
@@ -150,19 +137,6 @@ class SenGroupPageState extends State<SenGroupPage> {
         .set({
       'textContent': textContent,
     });
-
-    // Display the save notification only in SenGroupPage
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: const Text('Session saved successfully!',
-          textAlign: TextAlign.center),
-      backgroundColor: Colors.teal,
-      duration: const Duration(seconds: 2),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      margin: const EdgeInsets.only(top: 0.0),
-    ));
   }
 
   void _uploadFile({int? insertIndex}) async {
@@ -370,8 +344,7 @@ class SenGroupPageState extends State<SenGroupPage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Close',
-                  style: const TextStyle(color: Colors.teal)),
+              child: const Text('Close', style: TextStyle(color: Colors.teal)),
             ),
           ],
         );
@@ -443,22 +416,9 @@ class SenGroupPageState extends State<SenGroupPage> {
                                       : Colors.black54),
                               border: InputBorder.none,
                             ),
-                            onSubmitted: (text) {
+                            onChanged: (value) {
                               setState(() {
-                                globalText = text;
-                                contentList.add(
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 10.0),
-                                    child: Text(text,
-                                        style: TextStyle(
-                                            color: isDarkTheme
-                                                ? Colors.white
-                                                : Colors.black)),
-                                  ),
-                                );
-                                _textController.clear();
-                                _saveTextToFirebase(text, widget.username);
+                                globalText = value;
                               });
                             },
                           );
@@ -484,9 +444,12 @@ class SenGroupPageState extends State<SenGroupPage> {
                       ),
                       ElevatedButton(
                         onPressed: () async {
-                          await _saveTextToFirebase(
-                              globalText, widget.username);
-                          await _loadSessionFromFirebase();
+                          if (globalText.trim() != '') {
+                            await _saveTextToFirebase(
+                                globalText, widget.username);
+                            await _loadSessionFromFirebase();
+                            _textController.clear();
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.teal,

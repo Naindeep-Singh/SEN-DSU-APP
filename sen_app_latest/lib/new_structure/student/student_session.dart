@@ -48,19 +48,22 @@ class StudentSessionState extends State<StudentSession> {
     final QuerySnapshot result =
         await FirebaseFirestore.instance.collection('Sessions').get();
     final List<DocumentSnapshot> docs = result.docs;
-
-    setState(() {
-      sessions.clear();
-      filteredSessions.clear();
-      for (var doc in docs) {
-        sessions.add({
-          'title': doc['sessionTitle'],
-          'code': doc['code'],
-          'username': doc['username'],
-        });
-      }
-      filteredSessions.addAll(sessions);
-    });
+    try {
+      setState(() {
+        sessions.clear();
+        filteredSessions.clear();
+        for (var doc in docs) {
+          sessions.add({
+            'title': doc['sessionTitle'],
+            'code': doc['code'],
+            'username': doc['username'],
+          });
+        }
+        filteredSessions.addAll(sessions);
+      });
+    } catch (e) {
+      debugPrint('$e');
+    }
   }
 
   Future<void> saveSession(
@@ -103,7 +106,8 @@ class StudentSessionState extends State<StudentSession> {
             sessions.add({
               'title': sessionDoc['sessionTitle'],
               'code': sessionDoc['code'],
-              'username': sessionDoc['username'], // Store the creator's username
+              'username':
+                  sessionDoc['username'], // Store the creator's username
             });
             filteredSessions = sessions; // Update filtered list
           });
@@ -314,9 +318,10 @@ class StudentSessionState extends State<StudentSession> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.0)),
-          title: const Text('Join Session', style: TextStyle(color: Colors.teal)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+          title:
+              const Text('Join Session', style: TextStyle(color: Colors.teal)),
           content: TextField(
             controller: _joinController,
             decoration: InputDecoration(
@@ -360,26 +365,52 @@ class StudentSessionState extends State<StudentSession> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
           ),
-          title: const Text('Session Members', style: TextStyle(color: Colors.teal)),
+          title: const Text('Session Members',
+              style: TextStyle(color: Colors.teal)),
           content: SizedBox(
             width: double.minPositive,
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: members.length,
+              itemCount: members.length + 1, // Add one for the creator
               itemBuilder: (context, index) {
-                String username = members[index];
+                // Show the creator as the first item
+                if (index == 0) {
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    margin: const EdgeInsets.symmetric(vertical: 5.0),
+                    child: ListTile(
+                      leading: const CircleAvatar(
+                        backgroundImage: AssetImage(
+                            'assets/default_profile.png'), // Placeholder for profile picture
+                        radius: 20.0,
+                      ),
+                      title: Text('@$creator',
+                          style: const TextStyle(color: Colors.black)),
+                      subtitle: const Text('Creator',
+                          style: TextStyle(color: Colors.amber)),
+                    ),
+                  );
+                }
+
+                // Show the rest of the members
+                String username = members[index - 1];
                 return Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   margin: const EdgeInsets.symmetric(vertical: 5.0),
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: AssetImage('assets/default_profile.png'), // Placeholder for profile picture
+                    leading: const CircleAvatar(
+                      backgroundImage: AssetImage(
+                          'assets/default_profile.png'), // Placeholder for profile picture
                       radius: 20.0,
                     ),
-                    title: Text('@$username', style: const TextStyle(color: Colors.black)),
-                    subtitle: username == creator ? Text('Created by You', style: TextStyle(color: Colors.grey[700])) : null,
+                    title: Text('@$username',
+                        style: const TextStyle(color: Colors.black)),
+                    subtitle: Text('Member',
+                        style: TextStyle(color: Colors.grey[700])),
                   ),
                 );
               },
@@ -452,7 +483,8 @@ class StudentSessionState extends State<StudentSession> {
                   if (session['code'] != null)
                     Text(
                       'Sen Code: ${session['code']}',
-                      style: const TextStyle(color: Colors.teal, fontSize: 16.0),
+                      style:
+                          const TextStyle(color: Colors.teal, fontSize: 16.0),
                     ),
                 ],
               ),
@@ -466,7 +498,8 @@ class StudentSessionState extends State<StudentSession> {
                     .limit(1)
                     .get();
                 if (sessionQuery.docs.isNotEmpty) {
-                  List<dynamic> members = sessionQuery.docs.first['joinedUsers'];
+                  List<dynamic> members =
+                      sessionQuery.docs.first['joinedUsers'];
                   _showMembers(members, session['username']!);
                 }
               },
@@ -523,7 +556,10 @@ class StudentSessionState extends State<StudentSession> {
                     ? ListView.builder(
                         itemCount: filteredSessions.length,
                         itemBuilder: (context, index) {
-                          return _buildBanner(filteredSessions[index], index);
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                            child: _buildBanner(filteredSessions[index], index),
+                          );
                         },
                       )
                     : const Center(

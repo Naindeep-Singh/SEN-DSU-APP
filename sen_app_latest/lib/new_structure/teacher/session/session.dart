@@ -5,7 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sen_app_latest/new_structure/sen_group/sen_group.dart';
 
 class SessionLanding extends StatefulWidget {
-  const SessionLanding({super.key, required this.username, required this.email});
+  const SessionLanding(
+      {super.key, required this.username, required this.email});
   final String username;
   final String email;
 
@@ -36,10 +37,9 @@ class _SessionLandingState extends State<SessionLanding> {
   void _filterSessions() {
     setState(() {
       filteredSessions = sessions
-          .where((session) =>
-              session['title']!
-                  .toLowerCase()
-                  .contains(_searchController.text.toLowerCase()))
+          .where((session) => session['title']!
+              .toLowerCase()
+              .contains(_searchController.text.toLowerCase()))
           .toList();
     });
   }
@@ -63,7 +63,8 @@ class _SessionLandingState extends State<SessionLanding> {
     });
   }
 
-  Future<void> saveSession(String title, String code, String username, String email) async {
+  Future<void> saveSession(
+      String title, String code, String username, String email) async {
     await FirebaseFirestore.instance.collection('Sessions').add({
       'sessionTitle': title,
       'code': code,
@@ -226,9 +227,11 @@ class _SessionLandingState extends State<SessionLanding> {
                       child: ElevatedButton(
                         onPressed: () {
                           final random = Random();
-                          String generatedCode = (random.nextInt(9000) + 1000).toString(); // Generate a 4-digit code
+                          String generatedCode = (random.nextInt(9000) + 1000)
+                              .toString(); // Generate a 4-digit code
 
-                          saveSession(title!, generatedCode, widget.username, widget.email);
+                          saveSession(title!, generatedCode, widget.username,
+                              widget.email);
 
                           setState(() {
                             sessions.add({
@@ -269,7 +272,8 @@ class _SessionLandingState extends State<SessionLanding> {
         return AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-          title: const Text('Join Session', style: TextStyle(color: Colors.teal)),
+          title:
+              const Text('Join Session', style: TextStyle(color: Colors.teal)),
           content: TextField(
             controller: _joinController,
             decoration: InputDecoration(
@@ -356,7 +360,8 @@ class _SessionLandingState extends State<SessionLanding> {
                   if (session['code'] != null)
                     Text(
                       'Sen Code: ${session['code']}',
-                      style: const TextStyle(color: Colors.teal, fontSize: 16.0),
+                      style:
+                          const TextStyle(color: Colors.teal, fontSize: 16.0),
                     ),
                 ],
               ),
@@ -412,7 +417,10 @@ class _SessionLandingState extends State<SessionLanding> {
                     ? ListView.builder(
                         itemCount: filteredSessions.length,
                         itemBuilder: (context, index) {
-                          return _buildBanner(filteredSessions[index], index);
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                            child: _buildBanner(filteredSessions[index], index),
+                          );
                         },
                       )
                     : const Center(
