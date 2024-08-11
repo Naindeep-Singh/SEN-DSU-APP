@@ -62,29 +62,69 @@ class TeacherVivaState extends State<TeacherViva> {
 
   Widget buildViva(String vivaname, String start, String end, String vivaId) {
     return Card(
+      // Dark background color
       margin: const EdgeInsets.all(10.0),
+      child: Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.grey[850]!, Colors.grey[900]!],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12.0), // Match the Card's shape
+        
+      ),
       child: ListTile(
-        title: Text(vivaname),
+        title: Text(
+          vivaname,
+          style: const TextStyle(
+            color: Colors.white, // Light text color
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Text('Start: '),
-                Text(start),
+                const Text(
+                  'Start: ',
+                  style: TextStyle(
+                    color: Colors.grey, // Subtle text color for labels
+                  ),
+                ),
+                Text(
+                  start,
+                  style: const TextStyle(
+                    color: Colors.white, // Light text color for data
+                  ),
+                ),
               ],
             ),
             Row(
               children: [
-                const Text('End: '),
-                Text(end),
+                const Text(
+                  'End: ',
+                  style: TextStyle(
+                    color: Colors.grey, // Subtle text color for labels
+                  ),
+                ),
+                Text(
+                  end,
+                  style: const TextStyle(
+                    color: Colors.white, // Light text color for data
+                  ),
+                ),
               ],
             ),
           ],
         ),
         trailing: IconButton(
-          icon:
-              const Icon(Icons.group), // Use a group icon to represent students
+          icon: Icon(
+            Icons.group,
+            color: Color.fromARGB(255, 28, 178, 138), // Accent color for icon
+          ), // Use a group icon to represent students
           onPressed: () {
             Navigator.push(
               context,
@@ -97,6 +137,7 @@ class TeacherVivaState extends State<TeacherViva> {
           },
         ),
       ),
+    )
     );
   }
 
@@ -112,34 +153,46 @@ class TeacherVivaState extends State<TeacherViva> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.greenAccent,
-          title: Text(widget.classData['classname']),
+          backgroundColor: Color.fromARGB(255, 0, 0, 0), // Dark blue background color
+          title: Text(
+            widget.classData['classname'],
+            style: const TextStyle(
+              color: Colors.white, // White text color
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           leading: GestureDetector(
               onTap: () {
                 Navigator.pop(context);
               },
-              child: const Icon(Icons.arrow_back)),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white, // White icon color
+              )),
           actions: [
             IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () async {
-                  await showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return VivaDialog(
-                        username: widget.username,
-                        classData: widget.classData,
-                      );
-                    },
-                  ).then((result) {
-                    if (result != null) {
-                      // Handle the creation of the Viva with the returned data
-                      dev.log('Viva created with: $result');
-                      fetchVivaDetails();
-                      // You can add the viva data to your list or send it to Firestore here
-                    }
-                  });
-                })
+              icon: const Icon(Icons.add),
+              color: Color.fromARGB(255, 28, 178, 138), // Accent color for the icon
+              onPressed: () async {
+                await showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return VivaDialog(
+                      username: widget.username,
+                      classData: widget.classData,
+                    );
+                  },
+                ).then((result) {
+                  if (result != null) {
+                    // Handle the creation of the Viva with the returned data
+                    dev.log('Viva created with: $result');
+                    fetchVivaDetails();
+                    // You can add the viva data to your list or send it to Firestore here
+                  }
+                });
+              },
+            ),
           ],
         ),
         body: Center(
@@ -153,6 +206,7 @@ class TeacherVivaState extends State<TeacherViva> {
             },
           ),
         ),
+        backgroundColor: const Color(0xFF000000), // Pure black background color
       ),
     );
   }
