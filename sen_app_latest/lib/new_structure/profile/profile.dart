@@ -86,7 +86,7 @@ class ProfilePage extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFB399FF), Color(0xFF7A67E4)],
+                    colors: [Color.fromARGB(255, 118, 94, 189), Color(0xFF7A67E4)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -125,12 +125,12 @@ class ProfilePage extends StatelessWidget {
                     if (user != null && user.email != null)
                       Text(
                         "Email: ${user.email}",
-                        style: const TextStyle(fontSize: 16, color: Colors.grey),
+                        style: const TextStyle(fontSize: 16, color: Color.fromARGB(255, 255, 255, 255)),
                       ),
                     const SizedBox(height: 10),
                     Text(
                       "Role: $userType",
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      style: const TextStyle(fontSize: 16, color: Color.fromARGB(255, 255, 255, 255)),
                     ),
                   ],
                 ),
@@ -143,8 +143,9 @@ class ProfilePage extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: () => _signOut(context),
                       icon: const Icon(Icons.logout),
-                      label: const Text("Sign Out"),
+                      label: const Text("Sign Out", style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
+                        iconColor: Colors.white,
                         backgroundColor: const Color(0xFF7A67E4),
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
@@ -159,8 +160,9 @@ class ProfilePage extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: () => _deleteAccount(context),
                       icon: const Icon(Icons.delete),
-                      label: const Text("Delete Account"),
+                      label: const Text("Delete Account",style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
+                        iconColor: Colors.white,
                         backgroundColor: Colors.redAccent,
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(

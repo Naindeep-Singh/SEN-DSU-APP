@@ -75,22 +75,52 @@ class StudentVivaState extends State<StudentViva> {
     bool buttonEnabled = isButtonEnabled && !isStudentDone;
 
     return Card(
+      // Dark background color for cards
       margin: const EdgeInsets.all(10.0),
+      child: Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.grey[850]!, Colors.grey[900]!],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12.0), // Match the Card's shape
+        
+      ),
       child: ListTile(
-        title: Text(vivaname),
+        title: Text(
+          vivaname,
+          style: const TextStyle(
+            color: Colors.white, // Light text color
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Text('Start: '),
-                Text(start),
+                const Text(
+                  'Start: ',
+                  style: TextStyle(color: Colors.grey), // Subtle text color
+                ),
+                Text(
+                  start,
+                  style: const TextStyle(color: Colors.white), // Light text color
+                ),
               ],
             ),
             Row(
               children: [
-                const Text('End: '),
-                Text(end),
+                const Text(
+                  'End: ',
+                  style: TextStyle(color: Colors.grey), // Subtle text color
+                ),
+                Text(
+                  end,
+                  style: const TextStyle(color: Colors.white), // Light text color
+                ),
               ],
             ),
           ],
@@ -113,12 +143,19 @@ class StudentVivaState extends State<StudentViva> {
                 }
               : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: buttonEnabled ? Colors.green : Colors.grey,
+            backgroundColor: buttonEnabled
+                ? Colors.orange.shade300 // Accent color for active button
+                : Colors.grey, // Grey color for disabled button
           ),
-          child: Text(buttonText),
+          child: Text(
+            buttonText,
+            style: const TextStyle(
+              color: Colors.white, // Light text color for button text
+            ),
+          ),
         ),
       ),
-    );
+    ));
   }
 
   @override
@@ -133,13 +170,24 @@ class StudentVivaState extends State<StudentViva> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.greenAccent,
-          title: Text(widget.classData['classname']),
+          backgroundColor: Color.fromARGB(255, 0, 0, 0), // Dark blue background color
+          title: Text(
+            widget.classData['classname'],
+            style: const TextStyle(
+              color: Colors.white, // Light text color
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           leading: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: const Icon(Icons.arrow_back)),
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              Icons.arrow_back,
+              color: Colors.white, // Light icon color
+            ),
+          ),
         ),
         body: Center(
           child: ListView.builder(
@@ -152,6 +200,8 @@ class StudentVivaState extends State<StudentViva> {
             },
           ),
         ),
+        backgroundColor: const Color(0xFF000000),
+         // Pure black background color
       ),
     );
   }
