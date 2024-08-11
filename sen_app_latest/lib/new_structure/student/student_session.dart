@@ -4,7 +4,6 @@ import 'package:lottie/lottie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sen_app_latest/new_structure/sen_group/sen_group.dart';
 
-//sesion
 class StudentSession extends StatefulWidget {
   const StudentSession(
       {super.key, required this.username, required this.email});
@@ -77,50 +76,62 @@ class StudentSessionState extends State<StudentSession> {
   }
 
   Future<void> joinSession(String code, String username) async {
-    final sessionQuery = await FirebaseFirestore.instance
-        .collection('Sessions')
-        .where('code', isEqualTo: code)
-        .limit(1)
-        .get();
+    try {
+      // Convert the input code to ensure it matches the format in Firestore
+      final sessionQuery = await FirebaseFirestore.instance
+          .collection('Sessions')
+          .where('code', isEqualTo: code)
+          .limit(1)
+          .get();
 
-    if (sessionQuery.docs.isNotEmpty) {
-      DocumentSnapshot sessionDoc = sessionQuery.docs.first;
-      List<dynamic> joinedUsers = sessionDoc['joinedUsers'] ?? [];
+      if (sessionQuery.docs.isNotEmpty) {
+        DocumentSnapshot sessionDoc = sessionQuery.docs.first;
+        List<dynamic> joinedUsers = sessionDoc['joinedUsers'] ?? [];
 
-      // Add the user to the session if not already joined
-      if (!joinedUsers.contains(username)) {
-        joinedUsers.add(username);
-        await sessionDoc.reference.update({
-          'joinedUsers': joinedUsers,
-        });
-      }
-
-      // Add the session to the banner list if not already there
-      bool sessionExists = sessions.any((session) => session['code'] == code);
-      if (!sessionExists) {
-        setState(() {
-          sessions.add({
-            'title': sessionDoc['sessionTitle'],
-            'code': sessionDoc['code'],
-            'username': sessionDoc['username'], // Store the creator's username
+        // Add the user to the session if not already joined
+        if (!joinedUsers.contains(username)) {
+          joinedUsers.add(username);
+          await sessionDoc.reference.update({
+            'joinedUsers': joinedUsers,
           });
-          filteredSessions = sessions; // Update filtered list
-        });
-      }
+        }
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Session joined successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // Add the session to the banner list if not already there
+        bool sessionExists = sessions.any((session) => session['code'] == code);
+        if (!sessionExists) {
+          setState(() {
+            sessions.add({
+              'title': sessionDoc['sessionTitle'],
+              'code': sessionDoc['code'],
+              'username': sessionDoc['username'], // Store the creator's username
+            });
+            filteredSessions = sessions; // Update filtered list
+          });
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Session joined successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Session not found'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
       }
-    } else {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Session not found'),
+          SnackBar(
+            content: Text('Error joining session: $e'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -303,10 +314,9 @@ class StudentSessionState extends State<StudentSession> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-          title:
-              const Text('Join Session', style: TextStyle(color: Colors.teal)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0)),
+          title: const Text('Join Session', style: TextStyle(color: Colors.teal)),
           content: TextField(
             controller: _joinController,
             decoration: InputDecoration(

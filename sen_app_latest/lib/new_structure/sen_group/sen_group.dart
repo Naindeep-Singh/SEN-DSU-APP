@@ -38,7 +38,7 @@ class SenGroupPageState extends State<SenGroupPage> {
   Offset floatingButtonOffset =
       const Offset(20, 100); // Initialize with default position
 
-  static const apiKey = 'YOUR_API_KEY_HERE';
+  static const apiKey = 'AIzaSyCvxSwUiZdFR7PcSDzabYfpqKKLmHkOSuY';
   final model = 'gemini-1.5-pro';
 
   @override
@@ -99,15 +99,18 @@ class SenGroupPageState extends State<SenGroupPage> {
     final content = [
       Content.text('''
     {
-      "instructions": [
-        "Here is a summary of the session. Please read it carefully and then enhance it with the additional notes.",
-        "Generate a concise summary of the session text, and integrate the additional notes to provide a comprehensive overview.",
-        "Output the summary as a simple string without JSON formatting."
-      ],
-      "text": "$extractedText",
-      "additionalNotes": "$additionalNotes"
-    }
-    ''')
+     "instructions": [
+            "Carefully read the provided session text, images, and PDFs.",
+            "Generate a concise summary of the entire session content, including any relevant information from the images and PDFs.",
+            "If any questions were asked during the session, particularly related to topics such as addiction or any other mentioned topics, provide appropriate responses or answers to those questions.",
+            "If no session or questions were explicitly mentioned, generate responses based on the provided additional information or general context.",
+            "Output the summary and any relevant answers as a simple string, without JSON formatting."
+          ],
+          "text": "$extractedText",
+          "additionalNotes": "$additionalNotes",
+          "questions": "If there are any questions asked in the session, provide answers or guidance for those as well."
+        }
+        ''')
     ];
 
     final response = await model.generateContent(content);
