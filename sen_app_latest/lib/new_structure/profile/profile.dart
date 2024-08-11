@@ -86,7 +86,7 @@ class ProfilePage extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFB399FF), Color(0xFF7A67E4)],
+                    colors: [Color.fromARGB(255, 140, 116, 212), Color(0xFF7A67E4)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -130,7 +130,7 @@ class ProfilePage extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       "Role: $userType",
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      style: const TextStyle(fontSize: 16, color: Color.fromARGB(255, 255, 255, 255)),
                     ),
                   ],
                 ),
@@ -142,8 +142,8 @@ class ProfilePage extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => _signOut(context),
-                      icon: const Icon(Icons.logout),
-                      label: const Text("Sign Out"),
+                      icon: const Icon(Icons.logout, color: Colors.white),
+                      label: const Text("Sign Out", style: TextStyle( color: Colors.white)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7A67E4),
                         padding: const EdgeInsets.symmetric(vertical: 15),
@@ -158,8 +158,8 @@ class ProfilePage extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => _deleteAccount(context),
-                      icon: const Icon(Icons.delete),
-                      label: const Text("Delete Account"),
+                      icon: const Icon(Icons.delete, color: Colors.white),
+                      label: const Text("Delete Account" , style: TextStyle( color: Colors.white)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
                         padding: const EdgeInsets.symmetric(vertical: 15),

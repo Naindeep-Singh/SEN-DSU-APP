@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 class ClassFormDialog extends StatefulWidget {
   const ClassFormDialog({super.key, required this.username});
@@ -12,6 +13,7 @@ class ClassFormDialog extends StatefulWidget {
 }
 
 class ClassFormDialogState extends State<ClassFormDialog> {
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _classNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -75,6 +77,7 @@ class ClassFormDialogState extends State<ClassFormDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Color.fromARGB(255, 27, 101, 77),
       title: const Text('Create New Class'),
       content: Form(
         key: _formKey,
@@ -82,8 +85,9 @@ class ClassFormDialogState extends State<ClassFormDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
+              style: TextStyle(color: Colors.black),
               controller: _classNameController,
-              decoration: const InputDecoration(labelText: 'Class Name'),
+              decoration: const InputDecoration(labelText: 'Class Name', labelStyle: TextStyle(color: Colors.black)),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a class name';
@@ -92,8 +96,9 @@ class ClassFormDialogState extends State<ClassFormDialog> {
               },
             ),
             TextFormField(
+              style: TextStyle(color: Colors.black),
               controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(labelText: 'Description', labelStyle: TextStyle(color: Colors.black)),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a description';
@@ -111,6 +116,9 @@ class ClassFormDialogState extends State<ClassFormDialog> {
                   ),
                 ),
                 IconButton(
+                  style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all(Colors.black),
+                  ),
                   icon: const Icon(Icons.copy),
                   onPressed: () {
                     try {
@@ -130,15 +138,22 @@ class ClassFormDialogState extends State<ClassFormDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () async {
-            await _submitData();
-          },
-          child: const Text('Submit'),
-        ),
+  style: ButtonStyle(
+    foregroundColor: MaterialStateProperty.all<Color>(Colors.orange), // Use foregroundColor
+  ),
+  onPressed: () => Navigator.of(context).pop(),
+  child: const Text('Cancel'),
+),
+TextButton(
+  style: ButtonStyle(
+    foregroundColor: MaterialStateProperty.all<Color>(Colors.orange), // Use foregroundColor
+  ),
+  onPressed: () async {
+    await _submitData();
+  },
+  child: const Text('Submit'),
+),
+
       ],
     );
   }

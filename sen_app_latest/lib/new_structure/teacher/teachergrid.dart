@@ -64,12 +64,16 @@ class _TeacherGridPageState extends State<TeacherGridPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
-          children: [
-            Text('Student Grid Page'),
-          ],
+        backgroundColor: Colors.black, // Set the AppBar background to black
+        title: const Text(
+          'Student Grid Page',
+          style: TextStyle(color: Colors.white), // Set the title color to white
+        ),
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Set the back button color to white
         ),
       ),
+      backgroundColor: Colors.black, // Set the page background to black
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : GridView.builder(
@@ -93,8 +97,7 @@ class _TeacherGridPageState extends State<TeacherGridPage> {
                         : Colors.red.shade50, // Updated color for not done
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
-                      side:
-                          const BorderSide(color: Colors.deepPurple, width: 1),
+                      side: const BorderSide(color: Colors.deepPurple, width: 1),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -119,8 +122,7 @@ class _TeacherGridPageState extends State<TeacherGridPage> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(25),
-                              border: Border.all(
-                                  color: Colors.deepPurple, width: 1),
+                              border: Border.all(color: Colors.deepPurple, width: 1),
                             ),
                             child: Center(
                               child: Row(
