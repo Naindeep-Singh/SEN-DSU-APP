@@ -133,52 +133,86 @@ class _CommunityPageState extends State<CommunityPage> {
   }
 
   Widget _buildQuestionCard(Map<String, dynamic> question) {
-    return Card(
-      color: Colors.grey[850],
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              question['question'] ?? 'No question provided',
-              style: const TextStyle(
-                  color: Colors.teal, fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Asked by ${question['askedBy'] ?? 'Unknown'}',
-              style: TextStyle(color: Colors.grey[500], fontSize: 14),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => _showAnswerDialog(question['id']),
-                  icon: const Icon(Icons.reply, color: Colors.white),
-                  label: const Text('Answer', style: TextStyle(color: Colors.white)),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Card(
+        color: Colors.grey[900], // Darker background
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15), // Curved edges
+        ),
+        elevation: 4,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                question['question'] ?? 'No question provided',
+                style: const TextStyle(
+                    color: Colors.teal, fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Asked by ${question['askedBy'] ?? 'Unknown'}',
+                style: TextStyle(color: Colors.grey[500], fontSize: 14),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () => _showAnswerDialog(question['id']),
+                    icon: const Icon(Icons.reply, color: Colors.white),
+                    label: const Text('Answer', style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal, // Changed to teal
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15), // Curved button
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.redAccent),
+                    onPressed: () => _deleteQuestion(question['id']),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              if (question['answers'] != null && question['answers'].isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: question['answers'].map<Widget>((answer) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[850]?.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              answer['answer'] ?? 'No answer provided',
+                              style: const TextStyle(
+                                color: Colors.orange,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              'Answered by ${answer['username'] ?? 'Unknown'}',
+                              style: TextStyle(color: Colors.grey[500]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.redAccent),
-                  onPressed: () => _deleteQuestion(question['id']),
-                ),
-              ],
-            ),
-            if (question['answers'] != null && question['answers'].isNotEmpty)
-              ...question['answers'].map<Widget>((answer) {
-                return ListTile(
-                  title: Text(answer['answer'] ?? 'No answer provided',
-                      style: const TextStyle(color: Colors.grey)),
-                  subtitle: Text('Answered by ${answer['username'] ?? 'Unknown'}',
-                      style: TextStyle(color: Colors.grey[500])),
-                );
-              }).toList(),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -213,7 +247,7 @@ class _CommunityPageState extends State<CommunityPage> {
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.5,
               child: Lottie.network(
-                'https://lottie.host/7d2288ed-39fa-428d-afd8-878e0166f359/RPPastpfnf.json',
+                'https://lottie.host/108ffc03-3596-4e07-a1b3-c6fd78c93bad/Dt61OC7mHE.json',
                 fit: BoxFit.cover,
                 repeat: true,
               ),
@@ -221,7 +255,7 @@ class _CommunityPageState extends State<CommunityPage> {
           ),
           // Overlay content
           filteredQuestions.isEmpty
-              ? const Center(child: Text('', style: TextStyle(color: Colors.grey))) // add a commen foe the search bar
+              ? const Center(child: Text('', style: TextStyle(color: Colors.grey)))
               : ListView.builder(
                   itemCount: filteredQuestions.length,
                   itemBuilder: (context, index) {
@@ -236,10 +270,21 @@ class _CommunityPageState extends State<CommunityPage> {
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: const Text('Ask a Question'),
+                backgroundColor: Colors.grey[900], // Darker background for the dialog
+                title: const Text('Ask a Question', style: TextStyle(color: Colors.teal)),
                 content: TextField(
                   controller: _questionController,
-                  decoration: const InputDecoration(hintText: "Type your question"),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    hintText: "Type your question",
+                    hintStyle: TextStyle(color: Colors.grey),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.teal),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.teal),
+                    ),
+                  ),
                 ),
                 actions: [
                   TextButton(

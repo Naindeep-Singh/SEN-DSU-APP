@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
 import 'package:sen_app_latest/new_structure/login/login.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -65,8 +66,9 @@ class ProfilePage extends StatelessWidget {
           "$userType Profile",
           style: const TextStyle(
             color: Colors.teal,
-            fontSize: 24,
+            fontSize: 24, // Slightly reduced font size
             fontWeight: FontWeight.bold,
+            fontFamily: 'NothingTechFont', // Use the custom font
           ),
         ),
         actions: [
@@ -78,33 +80,40 @@ class ProfilePage extends StatelessWidget {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0), // Adjusted padding
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start, // Move content slightly higher
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Lottie.network(
+                'https://lottie.host/4b04c32e-e75f-49b9-8d25-1621db551bd1/QQ3HFlHOtJ.json',
+                height: 150, // Adjust the height to fit the profile image
+                width: 150,
+              ),
+              const SizedBox(height: 20),
               Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color.fromARGB(255, 140, 116, 212), Color(0xFF7A67E4)],
+                    colors: [Color.fromARGB(255, 50, 50, 50), Color(0xFF333333)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(25),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.5),
-                      spreadRadius: 5,
-                      blurRadius: 7,
+                      color: Colors.black.withOpacity(0.7),
+                      spreadRadius: 4,
+                      blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20), // Reduced padding to make it smaller
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     CircleAvatar(
-                      radius: 50,
+                      radius: 50, // Reduced size of the avatar
                       backgroundImage: user?.photoURL != null
                           ? NetworkImage(user!.photoURL!)
                           : null,
@@ -112,25 +121,49 @@ class ProfilePage extends StatelessWidget {
                           ? const Icon(Icons.person, size: 50, color: Colors.white)
                           : null,
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      "Welcome, $username",
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    const SizedBox(height: 20), // Adjusted spacing
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: username.substring(0, 1), // First letter
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 24, // Slightly reduced font size
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'NothingTechFont', // Use the custom font
+                            ),
+                          ),
+                          TextSpan(
+                            text: username.substring(1), // Rest of the letters
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24, // Slightly reduced font size
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'NothingTechFont', // Use the custom font
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 10), // Adjusted spacing
                     if (user != null && user.email != null)
                       Text(
                         "Email: ${user.email}",
-                        style: const TextStyle(fontSize: 16, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 16, // Reduced font size for email
+                          color: Colors.grey,
+                          fontFamily: 'NothingTechFont', // Use the custom font
+                        ),
                       ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 10), // Adjusted spacing
                     Text(
                       "Role: $userType",
-                      style: const TextStyle(fontSize: 16, color: Color.fromARGB(255, 255, 255, 255)),
+                      style: const TextStyle(
+                        fontSize: 16, // Reduced font size for role
+                        color: Colors.white,
+                        fontFamily: 'NothingTechFont', // Use the custom font
+                      ),
                     ),
                   ],
                 ),
@@ -143,10 +176,10 @@ class ProfilePage extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: () => _signOut(context),
                       icon: const Icon(Icons.logout, color: Colors.white),
-                      label: const Text("Sign Out", style: TextStyle( color: Colors.white)),
+                      label: const Text("Sign Out", style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF7A67E4),
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        backgroundColor: const Color(0xFF444444), // Darker shade for the button
+                        padding: const EdgeInsets.symmetric(vertical: 15), // Reduced padding
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30.0),
                         ),
@@ -159,10 +192,10 @@ class ProfilePage extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: () => _deleteAccount(context),
                       icon: const Icon(Icons.delete, color: Colors.white),
-                      label: const Text("Delete Account" , style: TextStyle( color: Colors.white)),
+                      label: const Text("Delete Account", style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        backgroundColor: const Color(0xFF880000), // Dark red for delete button
+                        padding: const EdgeInsets.symmetric(vertical: 15), // Reduced padding
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30.0),
                         ),

@@ -205,36 +205,36 @@ class _DocumentUploadState extends State<DocumentUpload> {
   Widget buildDocuments(String name, dynamic data, String docId) {
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(12),
       ),
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
       child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
+        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         leading: const Icon(
           Icons.picture_as_pdf,
           color: Colors.redAccent,
-          size: 36,
+          size: 28, // Reduced icon size
         ),
         title: Text(
           name,
           style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontSize: 16, // Reduced font size
+            fontWeight: FontWeight.w500,
           ),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon:
-                  const Icon(Icons.delete_forever, color: Colors.red, size: 28),
+              icon: const Icon(Icons.delete_forever, color: Colors.red, size: 24), // Reduced icon size
               onPressed: () => _deleteDocument(docId),
               tooltip: "Delete Document",
             ),
             Icon(
               Icons.arrow_forward_ios,
               color: Colors.grey.shade600,
+              size: 18, // Reduced icon size
             ),
           ],
         ),
@@ -359,15 +359,27 @@ class _DocumentUploadState extends State<DocumentUpload> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0), // Reduced padding
-                child: FloatingActionButton.extended(
-                  onPressed: _pickFileAndUpload,
-                  label: const Text('Upload Document'),
-                  icon: const Icon(Icons.upload_file),
-                  backgroundColor: Colors.teal,
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(8.0), // Slightly reduced radius
+                padding: const EdgeInsets.all(6.0), // Reduced padding
+                child: SizedBox(
+                  height: 48, // Slightly smaller height
+                  child: ElevatedButton.icon(
+                    onPressed: _pickFileAndUpload,
+                    icon: const Icon(Icons.upload_file, size: 20, color: Colors.teal), // Subtle icon color
+                    label: const Text(
+                      'Upload Document',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.teal, // Matching text color to icon
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.teal, backgroundColor: Colors.black, // Subtle text and icon color
+                      elevation: 1, // Reduced elevation for subtlety
+                      side: const BorderSide(color: Colors.teal), // Border to add a subtle outline
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0), // Slightly reduced radius
+                      ),
+                    ),
                   ),
                 ),
               ),
