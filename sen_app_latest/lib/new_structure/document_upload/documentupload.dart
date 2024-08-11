@@ -120,7 +120,7 @@ class _DocumentUploadState extends State<DocumentUpload> {
 
   Future<String> _sendFileToGemini(String extractedtext) async {
     log('Sending file to Gemini');
-    const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc';
+    const apiKey = 'AIzaSyBJoyuUGbTkuDbBeYtiShqke0FVUNLlZXY';
     final model = GenerativeModel(
         model: 'gemini-1.5-pro',
         apiKey: apiKey,
@@ -278,15 +278,11 @@ class _DocumentUploadState extends State<DocumentUpload> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
-        child: const Padding(
-          padding: EdgeInsets.all(16), // Reduce padding to make it smaller
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16), // Reduce space between elements
-              Text('Uploading...', style: TextStyle(color: Colors.white)),
-            ],
+        child: Center(
+          child: Lottie.network(
+            'https://lottie.host/bf54bc22-5ef0-44db-872f-6c859e16384d/OXWwJtv9g5.json',
+            height: 80, // Adjusted size to be slightly smaller
+            width: 80,
           ),
         ),
       ),
@@ -377,14 +373,6 @@ class _DocumentUploadState extends State<DocumentUpload> {
               ),
             ],
           ),
-          if (isUploading)
-            Center(
-              child: Lottie.network(
-                'https://lottie.host/bf54bc22-5ef0-44db-872f-6c859e16384d/OXWwJtv9g5.json',
-                height: 80, // Adjusted size to be slightly smaller
-                width: 80,
-              ),
-            ),
         ],
       ),
     );

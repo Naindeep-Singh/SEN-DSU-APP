@@ -319,7 +319,7 @@ class VivaDialogState extends State<VivaDialog> {
   Future<String> _sendFileToGemini(String extractedtext) async {
     // Define the mime type for PDF
     dev.log('Entered send file to gemini');
-    const apiKey = 'AIzaSyCOmrBF7Y2qrT8cZUkgNGt2JGZ_CmyLqHc';
+    const apiKey = 'AIzaSyBJoyuUGbTkuDbBeYtiShqke0FVUNLlZXY';
     // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
     final model = GenerativeModel(
         model: 'gemini-1.5-pro',
