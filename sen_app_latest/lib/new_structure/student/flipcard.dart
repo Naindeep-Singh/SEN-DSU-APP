@@ -10,7 +10,15 @@ class FlipCardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(''),
+        title: const Text(
+          'Flip Cards',
+          style: TextStyle(
+            color: Colors.black, // Set the title color to black
+          ),
+        ),
+        backgroundColor: Colors.white, // Set the app bar color to white
+        elevation: 0, // Remove the shadow
+        iconTheme: IconThemeData(color: Colors.black), // Set the icon color to black
       ),
       body: ListView.builder(
         itemCount: data.length,
@@ -18,7 +26,7 @@ class FlipCardPage extends StatelessWidget {
           // Create a key for the data using index
           String key = "${index + 1}";
           return Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: SizedBox(
               height: 200, // Set a fixed height for all tiles
               child: FlipCard(
@@ -28,13 +36,25 @@ class FlipCardPage extends StatelessWidget {
                 front: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blueAccent,
-                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 10,
+                        offset: Offset(0, 3), // changes position of shadow
+                      ),
+                    ],
                   ),
                   child: Center(
                     child: Text(
                       data[key]?["question"] ?? "No Question",
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -42,13 +62,25 @@ class FlipCardPage extends StatelessWidget {
                 back: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.teal,
-                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 10,
+                        offset: Offset(0, 3), // changes position of shadow
+                      ),
+                    ],
                   ),
                   child: Center(
                     child: Text(
                       data[key]?["answer"] ?? "No Answer",
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
