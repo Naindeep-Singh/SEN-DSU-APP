@@ -45,6 +45,12 @@
 
 To set up and run the SEN app locally, follow these steps:
 
+## Major Contributors
+
+- [Naindeep-Singh](https://github.com/Naindeep-Singh)
+- [DarshanAnand007](https://github.com/DarshanAnand007)
+- [nandeeeshh](https://github.com/nandeeeshh)
+
 1. **Clone the Repository**
 
    ```bash
