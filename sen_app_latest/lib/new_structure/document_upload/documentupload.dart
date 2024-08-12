@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sen_app_latest/new_structure/shared/topicspage.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:lottie/lottie.dart';
+import 'package:sen_app_latest/config/config.dart';
 
 class DocumentUpload extends StatefulWidget {
   final String username;
@@ -120,7 +121,7 @@ class _DocumentUploadState extends State<DocumentUpload> {
 
   Future<String> _sendFileToGemini(String extractedtext) async {
     log('Sending file to Gemini');
-    const apiKey = 'AIzaSyBJoyuUGbTkuDbBeYtiShqke0FVUNLlZXY';
+    const apiKey = geminiApiKey;
     final model = GenerativeModel(
         model: 'gemini-1.5-pro',
         apiKey: apiKey,
@@ -227,7 +228,8 @@ class _DocumentUploadState extends State<DocumentUpload> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: const Icon(Icons.delete_forever, color: Colors.red, size: 24), // Reduced icon size
+              icon: const Icon(Icons.delete_forever,
+                  color: Colors.red, size: 24), // Reduced icon size
               onPressed: () => _deleteDocument(docId),
               tooltip: "Delete Document",
             ),
@@ -364,7 +366,8 @@ class _DocumentUploadState extends State<DocumentUpload> {
                   height: 48, // Slightly smaller height
                   child: ElevatedButton.icon(
                     onPressed: _pickFileAndUpload,
-                    icon: const Icon(Icons.upload_file, size: 20, color: Colors.teal), // Subtle icon color
+                    icon: const Icon(Icons.upload_file,
+                        size: 20, color: Colors.teal), // Subtle icon color
                     label: const Text(
                       'Upload Document',
                       style: TextStyle(
@@ -373,11 +376,15 @@ class _DocumentUploadState extends State<DocumentUpload> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.teal, backgroundColor: Colors.black, // Subtle text and icon color
+                      foregroundColor: Colors.teal,
+                      backgroundColor:
+                          Colors.black, // Subtle text and icon color
                       elevation: 1, // Reduced elevation for subtlety
-                      side: const BorderSide(color: Colors.teal), // Border to add a subtle outline
+                      side: const BorderSide(
+                          color: Colors.teal), // Border to add a subtle outline
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0), // Slightly reduced radius
+                        borderRadius: BorderRadius.circular(
+                            8.0), // Slightly reduced radius
                       ),
                     ),
                   ),

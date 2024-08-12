@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:intl/intl.dart';
+import 'package:sen_app_latest/config/config.dart';
 import 'dart:io';
 import 'dart:developer' as dev;
 
@@ -326,7 +327,7 @@ class VivaDialogState extends State<VivaDialog> {
   Future<String> _sendFileToGemini(String extractedtext) async {
     // Define the mime type for PDF
     dev.log('Entered send file to gemini');
-    const apiKey = 'AIzaSyBJoyuUGbTkuDbBeYtiShqke0FVUNLlZXY';
+    const apiKey = geminiApiKey;
     // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
     final model = GenerativeModel(
         model: 'gemini-1.5-pro',

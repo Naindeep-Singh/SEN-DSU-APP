@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:lottie/lottie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:sen_app_latest/config/config.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class SenGroupPage extends StatefulWidget {
@@ -72,7 +73,7 @@ class SenGroupPageState extends State<SenGroupPage> {
       String extractedText, String additionalNotes) async {
     log('getting summary from Gemini');
     log(extractedText);
-    const apiKey = 'AIzaSyBJoyuUGbTkuDbBeYtiShqke0FVUNLlZXY';
+    const apiKey = geminiApiKey;
     final model = GenerativeModel(
         model: 'gemini-1.5-pro',
         apiKey: apiKey,
