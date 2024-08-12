@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sen_app_latest/new_structure/sen_group/sen_group.dart';
-
+//its perfect
 class SessionLanding extends StatefulWidget {
   const SessionLanding({super.key, required this.username, required this.email});
   final String username;
