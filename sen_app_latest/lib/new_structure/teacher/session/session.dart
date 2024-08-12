@@ -43,39 +43,95 @@ class SessionLandingState extends State<SessionLanding> {
           .toList();
     });
   }
-
+ 
   Future<void> _fetchSessions() async {
-    final QuerySnapshot result =
+  try {
+    final QuerySnapshot sessionResult =
         await FirebaseFirestore.instance.collection('Sessions').get();
-    final List<DocumentSnapshot> docs = result.docs;
-    try {
-      setState(() {
-        sessions.clear();
-        filteredSessions.clear();
-        for (var doc in docs) {
-          sessions.add({
-            'title': doc['sessionTitle'],
-            'code': doc['code'],
-            'username': doc['username'],
-          });
+    final List<DocumentSnapshot> sessionDocs = sessionResult.docs;
+
+    setState(() {
+      sessions.clear();
+      filteredSessions.clear();
+    });
+
+    for (var sessionDoc in sessionDocs) {
+      String username = sessionDoc['username'];
+      String? profileImageUrl;
+
+      try {
+        final QuerySnapshot profileQuery = await FirebaseFirestore.instance
+            .collection('profile')
+            .where('username', isEqualTo: username)
+            .limit(1)
+            .get();
+
+        if (profileQuery.docs.isNotEmpty) {
+          profileImageUrl = profileQuery.docs.first['profile_image_url'];
         }
-        filteredSessions.addAll(sessions);
+      } catch (e) {
+        debugPrint('Error fetching profile for $username: $e');
+      }
+
+      setState(() {
+        sessions.add({
+          'title': sessionDoc['sessionTitle'],
+          'code': sessionDoc['code'],
+          'username': sessionDoc['username'],
+          'profile_image_url': profileImageUrl,
+        });
+        filteredSessions = sessions; // Update filtered list
       });
-    } catch (e) {
-      debugPrint('$e');
     }
+
+    print("Sessions and profiles retrieved successfully.");
+  } catch (e) {
+    debugPrint('Error fetching sessions: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to load sessions: $e'),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
   }
+}
+
+  
 
   Future<void> saveSession(
       String title, String code, String username, String email) async {
-    await FirebaseFirestore.instance.collection('Sessions').add({
-      'sessionTitle': title,
-      'code': code,
-      'username': username,
-      'email': email,
-      'joinedUsers': [], // Initially, no users have joined
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+    try {
+      // Fetch user's profile image URL from Firestore
+      final userDoc = await FirebaseFirestore.instance
+          .collection('profile')
+          .where('username', isEqualTo: username)
+          .get();
+
+      String? profileImageUrl;
+      if (userDoc.docs.isNotEmpty) {
+        profileImageUrl = userDoc.docs.first['profile_image_url'];
+      }
+
+      await FirebaseFirestore.instance.collection('Sessions').add({
+        'sessionTitle': title,
+        'code': code,
+        'username': username,
+        'email': email,
+        'profile_image_url': profileImageUrl, // Save profile image URL
+        'joinedUsers': [], // Initially, no users have joined
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Session saved successfully.");
+    } catch (e) {
+      debugPrint('Error saving session: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save session: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   Future<void> joinSession(String code, String username) async {
@@ -106,8 +162,8 @@ class SessionLandingState extends State<SessionLanding> {
             sessions.add({
               'title': sessionDoc['sessionTitle'],
               'code': sessionDoc['code'],
-              'username':
-                  sessionDoc['username'], // Store the creator's username
+              'username': sessionDoc['username'], // Store the creator's username
+              'profile_image_url': sessionDoc['profile_image_url'], // Store the creator's profile image URL
             });
             filteredSessions = sessions; // Update filtered list
           });
@@ -286,6 +342,7 @@ class SessionLandingState extends State<SessionLanding> {
                               'title': title,
                               'code': generatedCode,
                               'username': widget.username,
+                              'profile_image_url': null, // Default to null, will update later
                             });
                             filteredSessions = sessions; // Update filtered list
                           });
@@ -356,7 +413,18 @@ class SessionLandingState extends State<SessionLanding> {
     );
   }
 
-  void _showMembers(List<dynamic> members, String creator) {
+  void _showMembers(List<dynamic> members, String creator) async {
+    // Fetch creator's profile image URL from Firestore
+    final creatorDoc = await FirebaseFirestore.instance
+        .collection('profile')
+        .where('username', isEqualTo: creator)
+        .get();
+    
+    String? creatorImageUrl;
+    if (creatorDoc.docs.isNotEmpty) {
+      creatorImageUrl = creatorDoc.docs.first['profile_image_url'];
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -381,9 +449,11 @@ class SessionLandingState extends State<SessionLanding> {
                     ),
                     margin: const EdgeInsets.symmetric(vertical: 5.0),
                     child: ListTile(
-                      leading: const CircleAvatar(
-                        backgroundImage: AssetImage(
-                            'assets/default_profile.png'), // Placeholder for profile picture
+                      leading: CircleAvatar(
+                        backgroundImage: creatorImageUrl != null
+                            ? NetworkImage(creatorImageUrl)
+                            : const AssetImage('assets/default_profile.png')
+                                as ImageProvider,
                         radius: 20.0,
                       ),
                       title: Text('@$creator',
@@ -396,22 +466,41 @@ class SessionLandingState extends State<SessionLanding> {
 
                 // Show the rest of the members
                 String username = members[index - 1];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  margin: const EdgeInsets.symmetric(vertical: 5.0),
-                  child: ListTile(
-                    leading: const CircleAvatar(
-                      backgroundImage: AssetImage(
-                          'assets/default_profile.png'), // Placeholder for profile picture
-                      radius: 20.0,
-                    ),
-                    title: Text('@$username',
-                        style: const TextStyle(color: Colors.black)),
-                    subtitle: Text('Member',
-                        style: TextStyle(color: Colors.grey[700])),
-                  ),
+
+                return FutureBuilder<DocumentSnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('profile')
+                      .where('username', isEqualTo: username)
+                      .get()
+                      .then((value) => value.docs.first),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      String? memberImageUrl = snapshot.data?['profile_image_url'];
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        margin: const EdgeInsets.symmetric(vertical: 5.0),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage: memberImageUrl != null
+                                ? NetworkImage(memberImageUrl)
+                                : const AssetImage('assets/default_profile.png')
+                                    as ImageProvider,
+                            radius: 20.0,
+                          ),
+                          title: Text('@$username',
+                              style: const TextStyle(color: Colors.black)),
+                          subtitle: Text('Member',
+                              style: TextStyle(color: Colors.grey[700])),
+                        ),
+                      );
+                    } else {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                  },
                 );
               },
             ),
@@ -467,6 +556,14 @@ class SessionLandingState extends State<SessionLanding> {
         ),
         child: Row(
           children: [
+            CircleAvatar(
+              backgroundImage: session['profile_image_url'] != null
+                  ? NetworkImage(session['profile_image_url']!)
+                  : const AssetImage('assets/default_profile.png')
+                      as ImageProvider,
+              radius: 20.0,
+            ),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

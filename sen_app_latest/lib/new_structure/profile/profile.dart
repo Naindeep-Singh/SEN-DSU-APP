@@ -24,11 +24,27 @@ class ProfilePage extends StatelessWidget {
     }
   }
 
+  Future<void> _updateProfileInFirestore() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      final profileRef = FirebaseFirestore.instance.collection('profile').doc(user.uid);
+
+      await profileRef.set({
+        'uid': user.uid,
+        'username': username,
+        'profile_image_url': user.photoURL,
+        'email': user.email,
+        'userType': userType,
+        'last_login': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    }
+  }
+
   Future<void> _deleteAccount(BuildContext context) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        // Delete from Firestore
         final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
             .collection('users')
             .where('username', isEqualTo: username)
@@ -39,8 +55,9 @@ class ProfilePage extends StatelessWidget {
           await doc.reference.delete();
         }
 
-        // Delete from Firebase Auth
         await user.delete();
+        await FirebaseFirestore.instance.collection('profile').doc(user.uid).delete();
+
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const LoginPage()),
         );
@@ -57,6 +74,8 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
 
+    _updateProfileInFirestore();
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -66,9 +85,9 @@ class ProfilePage extends StatelessWidget {
           "$userType Profile",
           style: const TextStyle(
             color: Colors.teal,
-            fontSize: 24, // Slightly reduced font size
+            fontSize: 24,
             fontWeight: FontWeight.bold,
-            fontFamily: 'NothingTechFont', // Use the custom font
+            fontFamily: 'NothingTechFont',
           ),
         ),
         actions: [
@@ -80,17 +99,19 @@ class ProfilePage extends StatelessWidget {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0), // Adjusted padding
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start, // Move content slightly higher
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Lottie.network(
-                'https://lottie.host/4b04c32e-e75f-49b9-8d25-1621db551bd1/QQ3HFlHOtJ.json',
-                height: 150, // Adjust the height to fit the profile image
-                width: 150,
+              Center(
+                child: Lottie.network(
+                  'https://lottie.host/199060ad-b4e8-4bc0-a323-b17d79b8ae9c/Nq7MZcVJL2.json',
+                  height: 120, // Adjusted height to fit better with the profile container
+                  width: 120,
+                ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
@@ -108,12 +129,12 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(20), // Reduced padding to make it smaller
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     CircleAvatar(
-                      radius: 50, // Reduced size of the avatar
+                      radius: 50,
                       backgroundImage: user?.photoURL != null
                           ? NetworkImage(user!.photoURL!)
                           : null,
@@ -121,48 +142,48 @@ class ProfilePage extends StatelessWidget {
                           ? const Icon(Icons.person, size: 50, color: Colors.white)
                           : null,
                     ),
-                    const SizedBox(height: 20), // Adjusted spacing
+                    const SizedBox(height: 20),
                     RichText(
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: username.substring(0, 1), // First letter
+                            text: username.substring(0, 1),
                             style: const TextStyle(
                               color: Colors.red,
-                              fontSize: 24, // Slightly reduced font size
+                              fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              fontFamily: 'NothingTechFont', // Use the custom font
+                              fontFamily: 'NothingTechFont',
                             ),
                           ),
                           TextSpan(
-                            text: username.substring(1), // Rest of the letters
+                            text: username.substring(1),
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 24, // Slightly reduced font size
+                              fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              fontFamily: 'NothingTechFont', // Use the custom font
+                              fontFamily: 'NothingTechFont',
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 10), // Adjusted spacing
+                    const SizedBox(height: 10),
                     if (user != null && user.email != null)
                       Text(
                         "Email: ${user.email}",
                         style: const TextStyle(
-                          fontSize: 16, // Reduced font size for email
+                          fontSize: 16,
                           color: Colors.grey,
-                          fontFamily: 'NothingTechFont', // Use the custom font
+                          fontFamily: 'NothingTechFont',
                         ),
                       ),
-                    const SizedBox(height: 10), // Adjusted spacing
+                    const SizedBox(height: 10),
                     Text(
                       "Role: $userType",
                       style: const TextStyle(
-                        fontSize: 16, // Reduced font size for role
+                        fontSize: 16,
                         color: Colors.white,
-                        fontFamily: 'NothingTechFont', // Use the custom font
+                        fontFamily: 'NothingTechFont',
                       ),
                     ),
                   ],
@@ -178,8 +199,8 @@ class ProfilePage extends StatelessWidget {
                       icon: const Icon(Icons.logout, color: Colors.white),
                       label: const Text("Sign Out", style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF444444), // Darker shade for the button
-                        padding: const EdgeInsets.symmetric(vertical: 15), // Reduced padding
+                        backgroundColor: const Color(0xFF444444),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30.0),
                         ),
@@ -194,8 +215,8 @@ class ProfilePage extends StatelessWidget {
                       icon: const Icon(Icons.delete, color: Colors.white),
                       label: const Text("Delete Account", style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF880000), // Dark red for delete button
-                        padding: const EdgeInsets.symmetric(vertical: 15), // Reduced padding
+                        backgroundColor: const Color(0xFF880000),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30.0),
                         ),
