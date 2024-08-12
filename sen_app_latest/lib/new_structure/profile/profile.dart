@@ -105,12 +105,14 @@ class ProfilePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Center(
+                child: Align(
+                  alignment: Alignment(0.21,0.0),
                 child: Lottie.network(
                   'https://lottie.host/199060ad-b4e8-4bc0-a323-b17d79b8ae9c/Nq7MZcVJL2.json',
                   height: 120, // Adjusted height to fit better with the profile container
                   width: 120,
                 ),
-              ),
+              )),
               const SizedBox(height: 10),
               Container(
                 decoration: BoxDecoration(
