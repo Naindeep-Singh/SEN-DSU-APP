@@ -1,69 +1,51 @@
-# SEN - Smart Educational Neural-net
+# SEN - Smart Educational Neural-Net
 
-This application allows you to upload a PDF, process it using GeminiAPI, and generate multiple-choice questions (MCQs) to create an interactive learning environment. Students can use this to learn or take tests, while teachers can provide tests or viva questions to students.
+**SEN - Smart Educational Neural-Net** is an AI-powered smart learning system designed to enhance the educational experience for both teachers and students. With SEN, users can leverage advanced AI capabilities to create interactive classes, participate in engaging sessions, and access AI-generated learning materials.
 
 ## Features
 
-- Upload PDFs and extract content using GeminiAPI.
-- Generate MCQs automatically from the extracted content.
-- Create interactive quizzes for students.
-- Useful for both learning and assessment purposes.
+### Viva - AI and Classes
+- **Create Classes**: Teachers can create classes with unique join codes.
+- **AI Viva Questions**: Generate AI-powered viva questions and answers by uploading a PDF.
+- **Real-time Updates**: Students get added to vivas in real-time, and scores are updated instantly.
 
-## Installation
+### Sessions
+- **Create Sessions**: Initiate sessions and invite others to join.
+- **Interactive Communication**: Chat, send documents, and interact with AI to generate summaries and ask questions.
 
-### Prerequisites
+### Global Chat
+- **Community Interaction**: Ask questions and get answers from the community.
 
-Ensure you have the following installed on your machine:
+### Document Upload
+- **AI-Generated Study Material**: Students can upload documents to receive AI-generated study aids, including MCQ-based self-tests and flashcards with questions and answers.
 
-- Python 3.x
-- pip (Python package installer)
+## Flow
 
-### Steps
+1. **Login and Signup**
+   - Users can sign up or log in through standard email or Google authentication (via Firebase).
+   - Two user types: Teacher and Student login.
 
-1. **Clone the repository:**
+2. **Feature Access**
+   - Teachers can create classes and sessions, and manage AI viva questions.
+   - Students can join classes and sessions, participate in global chats, and upload documents for study material.
 
-    ```bash
-    git clone https://github.com/yourusername/interactive-learning-app.git
-    cd interactive-learning-app
-    ```
+## Technology Stack
 
-2. **Create a virtual environment:**
+- **Firebase**
+  - Authentication: Supports Google and standard login methods.
+  - Data Storage: Manages user and application data.
 
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-    ```
+- **Flutter**
+  - Frontend: Provides a seamless and responsive user interface for the entire app.
 
-3. **Install the required dependencies:**
+- **Gemini API**
+  - AI Services: Powers all AI-related functionalities, including question generation and study material creation.
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+## Getting Started
 
-4. **Set up environment variables:**
+To set up and run the SEN app locally, follow these steps:
 
-    Create a `.env` file in the project root directory and add your GeminiAPL API key:
+1. **Clone the Repository**
 
-    ```plaintext
-    GEMINIAPI_API_KEY=your_api_key_here
-    ```
-
-5. **Run the application:**
-
-    ```bash
-    python app.py
-    ```
-
-## Usage
-
-1. **Upload a PDF:**
-   - Navigate to the upload section.
-   - Select the PDF you want to process.
-
-2. **Generate MCQs:**
-   - The app will process the PDF using GeminiAPI and generate MCQs.
-   - Review and edit the generated questions if needed.
-
-3. **Create a Quiz:**
-   - Use the generated MCQs to create a quiz.
-   - Share the quiz link with students for interactive learning or assessment.
+   ```bash
+   git clone https://github.com/yourusername/sen.git
