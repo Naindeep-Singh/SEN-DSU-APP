@@ -48,4 +48,4 @@ To set up and run the SEN app locally, follow these steps:
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/yourusername/sen.git
+   git clone [https://github.com/yourusername/sen.git](https://github.com/Naindeep-Singh/SEN-DSU-APP.git)
