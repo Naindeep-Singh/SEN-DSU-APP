@@ -51,10 +51,10 @@ To set up and run the SEN app locally, follow these steps:
    git clone [https://github.com/yourusername/sen.git](https://github.com/Naindeep-Singh/SEN-DSU-APP.git)
 
 ## Gemini API challenge link
-[(https://ai.google.dev/competition/projects/sen)](https://ai.google.dev/competition/projects/sen)
+[https://ai.google.dev/competition/projects/sen](https://ai.google.dev/competition/projects/sen)
 
 ## Youtube link
-[(https://www.youtube.com/watch?v=YkWMDvhHzOk&t=3s)](https://www.youtube.com/watch?v=YkWMDvhHzOk&t=3s)
+[https://www.youtube.com/watch?v=YkWMDvhHzOk&t=3s](https://www.youtube.com/watch?v=YkWMDvhHzOk&t=3s)
 
 ## Major Contributors
 
